@@ -19,7 +19,7 @@ ICdlst = []
 Cmc4lst = []
 csvreader = list(csv.reader(file))
 
-            ###########EDIT THE VALUES IN THE BRACKET BELOW############
+###########EDIT THE VALUES IN THE BRACKET BELOW############
 for row in csvreader[51:81]:
     for i in range(0, len(row)):
         row[i] = float(row[i])
@@ -64,6 +64,11 @@ def momentdistribution(y):
 for element in yvalues:
     momentdistributionlst.append(momentdistribution(element))
 
-plt.figure()
-plt.plot(yvalues, momentdistributionlst)
+origin = [0, 0]
+shearpointload = [0, sheardistributionlst[0]]
+momentpointload = [0, momentdistributionlst[0]]
+plt.subplot(1)
+plt.plot(yvalues, sheardistributionlst, 'b', origin, shearpointload, 'b')
+plt.subplot(2)
+plt.plot(yvalues, momentdistributionlst, 'b', origin, momentpointload, 'b')
 plt.show()
