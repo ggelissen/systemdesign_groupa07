@@ -60,4 +60,5 @@ def Rate_of_Twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    return RT
 def Rate_of_Twist_3(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    RT = [2*Enclosed_Area_2(t_1,t_2,t_3,L_1,L_3)/G , 2*Enclosed_Area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3)/G]
+   #whole thing is divided by J
    return RT
