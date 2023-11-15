@@ -3,8 +3,8 @@ import scipy as sp
 from scipy import interpolate
 from matplotlib import pyplot as plt
 from scipy import integrate
-
 import numpy as np
+
 file = open('A07csv2.csv')
 type(file)
 
@@ -48,21 +48,22 @@ def Ldistribution(y):
     global q
     return yCl(ylst, Cllst, y)*q*ychord(ylst, chordlst, y)
 
-
 sheardistributionlst = []
-def sheardistribution(xlst):
-    for element in xlst:
-        estimateshear,errorshear = sp.integrate.quad(Ldistribution,element,33.5)
-        sheardistributionlst.append(estimateshear)
-    return sheardistributionlst
+def sheardistribution(y):
+    estimateshear,errorshear = sp.integrate.quad(Ldistribution,y,33.5)
+    return estimateshear
+
+for element in yvalues:
+    sheardistributionlst.append(sheardistribution(element))
 
 momentdistributionlst = []
-def momentdistribution(xlst):
-    for element in xlst:
-        estimatemoment,errormoment = sp.integrate.quad(sheardistribution,element,33.5)
-        momentdistributionlst.append(estimatemoment)
-    return momentdistributionlst
+def momentdistribution(y):
+    estimatemoment,errormoment = sp.integrate.quad(sheardistribution,y,33.5)
+    return estimatemoment
+
+for element in yvalues:
+    momentdistributionlst.append(momentdistribution(element))
 
 plt.figure()
-plt.plot(yvalues, momentdistribution(yvalues))
+plt.plot(yvalues, momentdistributionlst)
 plt.show()
