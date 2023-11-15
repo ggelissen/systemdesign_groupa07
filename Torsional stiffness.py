@@ -35,7 +35,7 @@ def Torsional_stiffness_single_cell_1(t_1,t_11,t_2,t_3,L_1,L_2,y,G):
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #Find torsional stiffness distribution for double-cell wing box k(y) over the half wing span by St Venant’s torsion constant
-#Fing length od the middle spar
+#Find length of the middle spar
 def Length_of_Middle_Spar(L_1,L_3,t_2,t_3):
    #L_3 is the distance from the front spar to midline of middle spar
    L = L_1 * L_3 / h_length - t_2 * l_up / (2 * h_length) - t_3 * l_low / (2 * h_length)
