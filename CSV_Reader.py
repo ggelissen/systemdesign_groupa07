@@ -41,3 +41,5 @@ yvalues = np.arange(0, 33.5, 0.01)
 plt.figure()
 plt.plot(yvalues, yCmc4(yvalues))
 plt.show()
+
+print("Hello world!")
