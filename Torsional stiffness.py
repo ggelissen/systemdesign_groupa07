@@ -17,11 +17,11 @@ def line_integral(t_1,t_11,t_2,t_3,L_1,L_2,option):
    I_4 = (l_low - t_1 * l_low / (2 * h_length) - t_11 * l_low / (2 * h_length))/t_3
    #Add all together
    I = I_1 + I_2 + I_3 + I_4
-       integrals = {
-        1: I,
-        2: I_1,
-        3: I_2
-    }
+   integrals = {
+      1: I,
+      2: I_1,
+      3: I_2
+   }
    return integrals.get(option, None)
 #Find torsional constant
 def Torsional_constant_1(t_1,t_11,t_2,t_3,L_1,L_2):
@@ -50,17 +50,17 @@ def Enclosed_Area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3):
    return Am
 def Rate_of_Twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    #t_4 is the thickness of middle spar
-   LI =  [line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2)/t_1 + ((L_3 * l_low / h_length)-t_1 * l_low/(2 * h_length))/t_3 + Length_of_Middle_Spar(L_1,L_3,t_2,t_3) /t_4 + ((L_3*l_up/h_length)-t_1 * l_up/(2 * h_length))/t_2 , -Length_of_Middle_Spar(L_1,L_3,t_2,t_3)/t_4]
-   RT = LI.append(-2 * Enclosed_Area_2(t_1,t_2,t_3,L_1,L_3) * G)
-   return RT
+   coeff =  [line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2)/t_1 + ((L_3 * l_low / h_length)-t_1 * l_low/(2 * h_length))/t_3 + Length_of_Middle_Spar(L_1,L_3,t_2,t_3) /t_4 + ((L_3*l_up/h_length)-t_1 * l_up/(2 * h_length))/t_2 , -Length_of_Middle_Spar(L_1,L_3,t_2,t_3)/t_4]
+   coeff.append(-2 * Enclosed_Area_2(t_1,t_2,t_3,L_1,L_3) * G)
+   return coeff
 def Rate_of_Twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    #t_4 is the thickness of middle spar
-   LI =  [-Length_of_Middle_Spar(L_1,L_3,t_2,t_3)/t_4 , line_integral(t_1,t_11,t_2,t_3,L_1,L_2,3)/t_11 + (l_up-(L_3 * l_up / h_length)-t_11 * l_up/(2 * h_length))/t_2 + Length_of_Middle_Spar(L_1,L_3,t_2,t_3)/t_4 +(l_low-(L_3 * l_low / h_length)-t_11 * l_low/(2 * h_length))/t_3]
-   RT = LI.append(-2 * Enclosed_Area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3) * G)
-   return RT
+   coeff =  [-Length_of_Middle_Spar(L_1,L_3,t_2,t_3)/t_4 , line_integral(t_1,t_11,t_2,t_3,L_1,L_2,3)/t_11 + (l_up-(L_3 * l_up / h_length)-t_11 * l_up/(2 * h_length))/t_2 + Length_of_Middle_Spar(L_1,L_3,t_2,t_3)/t_4 +(l_low-(L_3 * l_low / h_length)-t_11 * l_low/(2 * h_length))/t_3]
+   coeff.append(-2 * Enclosed_Area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3) * G)
+   return coeff
 def Rate_of_Twist_Value(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    import numpy as np
-   Matrix = np.array([[2*Enclosed_Area_2(t_1,t_2,t_3,L_1,L_3),2*Enclosed_Area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3),0.],Rate_of_Twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G),Rate_of_Twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)])
+   matrix = np.array([[2*Enclosed_Area_2(t_1,t_2,t_3,L_1,L_3),2*Enclosed_Area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3),0.],Rate_of_Twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G),Rate_of_Twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)])
    righthandside = np.array([1.,0.,0.])
    solution = np.linalg.solve(matrix,righthandside)
    return solution[3]
