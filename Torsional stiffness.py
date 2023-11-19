@@ -51,7 +51,7 @@ def rate_of_twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    coeff =  [line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2)/t_1 + (L_3 / math.cos(beta) - t_1 / (2 * math.cos(beta))/t_3 + length_of_middle_spar(L_1,L_3,t_2,t_3) /t_4 + (L_3 / math.cos(alpha) - t_1 / (2 * math.cos(alpha)))/t_2 , -length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4]
    coeff.append(-2 * enclosed_area_2(t_1,t_2,t_3,L_1,L_3) * G)
    return coeff
-def Rate_of_twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
+def rate_of_twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    coeff =  [-length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 , line_integral(t_1,t_11,t_2,t_3,L_1,L_2,3)/t_11 + (l_up - L_3 / math.cos(alpha) - t_11 / (2 * math.cos(alpha))/t_2 + length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 + (l_low - L_3 / math.cos(beta) - t_11 / (2 * math.cos(beta))/t_3]
    coeff.append(-2 * enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3) * G)
    return coeff
@@ -67,7 +67,7 @@ def torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y,G):
    return G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)/y
 #-----------------------------------------------------------------------------------------------------------------------------
 #import scipy as sp
-def torq_over_const(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
+def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
    T_1 = T / (G * torsional_constant_1(t_1,t_11,t_2,t_3,L_1,L_2))
    T_2 = T / (G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G))
    integrand = {
@@ -77,12 +77,12 @@ def torq_over_const(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
    return integrand.get(option, None)
 def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_5):
    #L_5 length of the double cell wing box
-   twist_angle_at_L_5 = sp.integrate.quad(torq_over_const(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,L_5)
+   twist_angle_at_L_5 = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,L_5)
    if y > L_5:
-      theta = sp.integrate.quad(torq_over_const(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1),L_5,y) + twist_angle_at_L_5
+      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1),L_5,y) + twist_angle_at_L_5
       return theta[0]
    else:
-      theta = sp.integrate.quad(torq_over_const(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,y)
+      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,y)
       return theta[0]
 
 
