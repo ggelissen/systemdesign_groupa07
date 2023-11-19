@@ -6,11 +6,11 @@ from scipy import integrate
 import numpy as np
 
 # Read the CSV file
-data = np.array()
+data = []
 with open('A07csv2.csv', 'r') as file:
     csv_reader = reader(file)
     for row in csv_reader:
-        data = np.append(data, row)
+        data.append(row)
 
 # Defined constants
 rho = 1.225
@@ -19,15 +19,15 @@ q = 0.5*rho*(v**2)
 halfspan = 33.5
 
 # Create arrays for the values in the CSV file
-ylst = np.array()
-chordlst = np.array()
-Ailst = np.array()
-Cllst = np.array()
-ICdlst = np.array()
-Cmc4lst = np.array()
+ylst = np.empty((1, 1), float)
+chordlst = np.empty((1, 1), float)
+Ailst = np.empty((1, 1), float)
+Cllst = np.empty((1, 1), float)
+ICdlst = np.empty((1, 1), float)
+Cmc4lst = np.empty((1, 1), float)
 
 # Append correct values from csv_reader to arrays
-for row in data[51:81]:        # Range can be adjusted here!
+for row in data[51:81]:      # Range can be adjusted here!
     ylst = np.append(ylst, float(row[0]))
     chordlst = np.append(chordlst, float(row[1]))
     Ailst = np.append(Ailst, float(row[2]))
@@ -36,55 +36,55 @@ for row in data[51:81]:        # Range can be adjusted here!
     Cmc4lst = np.append(Cmc4lst, float(row[7]))
 
 # Functions to interpolate the values
-def yCl(y, Cl, input_values):
-    yCl = sp.interpolate.interp1d(y,Cl,kind='cubic',fill_value="extrapolate")
-    return yCl(input_values)
+def yCl(y, Cl):
+    return sp.interpolate.interp1d(y,Cl,kind='cubic',fill_value="extrapolate")
 
-def ychord(y, chord, input_values):
-    ychord = sp.interpolate.interp1d(y,chord,kind='cubic',fill_value="extrapolate")
-    return ychord(input_values)
+def ychord(y, chord):
+    return sp.interpolate.interp1d(y,chord,kind='cubic',fill_value="extrapolate")
 
-def yICd(y, ICd, input_values):
-    yICd = sp.interpolate.interp1d(y,ICd,kind='cubic',fill_value="extrapolate")
-    return yICd(input_values)
+def yICd(y, ICd):
+    return sp.interpolate.interp1d(y,ICd,kind='cubic',fill_value="extrapolate")
 
-def yCmc4(y, cmc4, input_values):
-    yCmc4 = sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
-    return yCmc4(input_values)
+def yCmc4(y, cmc4):
+    return sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
 
 # Define set of values for y
-yvalues = np.arange(0, halfspan, 0.5)
+yvalues = np.arange(0, halfspan, 1)
+yCl_result = yCl(ylst, Cllst)
+ychord_result = ychord(ylst, chordlst)
+yICd_result = yICd(ylst, ICdlst)
+yCmc4_result = yCmc4(ylst, Cmc4lst)
 
 # Functions to calculate distributed load an point load
 def Ldistribution(x):
     global q
-    return yCl(ylst, Cllst, x) * q * ychord(ylst, chordlst, x)
+    return yCl_result(x) * q * ychord_result(x)
 
 def pointload(x):
     global halfspan
-    totallift, error = sp.integrate.quad(Ldistribution, 0, halfspan)
+    totallift, error = sp.integrate.quad(Ldistribution, 0, halfspan, limit=1000)
     if x == 0:
         return totallift
     else:
         return 0
 
-def moment(x):
-    return pointload(x) * 
+#def moment(x):
+#    return pointload(x) * 
 
 # Functions to define shear and moment distributions
 def sheardistribution(y):
-    estimateshear,errorshear = sp.integrate.quad(Ldistribution, y , 33.5)
+    estimateshear,errorshear = sp.integrate.quad(Ldistribution, y , 33.5, limit=1000)
     return estimateshear - pointload(y)
 
-sheardistributionlst = np.array()
+sheardistributionlst = np.array((1, 1), float)
 for element in yvalues:
     sheardistributionlst = np.append(sheardistributionlst, sheardistribution(element))
 
 def momentdistribution(z):
-    estimatemoment,errormoment = sp.integrate.quad(sheardistribution,z,33.5)
+    estimatemoment,errormoment = sp.integrate.quad(sheardistribution,z,33.5, limit=1000)
     return estimatemoment
 
-momentdistributionlst = np.array()
+momentdistributionlst = np.array((1, 1), float)
 for element in yvalues:
     momentdistributionlst = np.append(momentdistributionlst, momentdistribution(element))
 
