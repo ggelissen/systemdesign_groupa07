@@ -50,7 +50,7 @@ def yCmc4(y, cmc4):
     return sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
 
 # Define set of values for y
-yvalues = np.arange(0, halfspan, 1)
+yvalues = np.arange(0, halfspan, 0.5)
 
 yCl_result = yCl(ylst, Cllst)
 ychord_result = ychord(ylst, chordlst)
