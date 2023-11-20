@@ -7,7 +7,7 @@ import numpy as np
 
 # Read the CSV file
 data = []
-with open('A07csv2.csv', 'r') as file:
+with open('A07csv3.csv', 'r') as file:
     csv_reader = reader(file)
     for row in csv_reader:
         data.append(row)
@@ -50,7 +50,7 @@ def yCmc4(y, cmc4):
     return sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
 
 # Define set of values for y
-yvalues = np.arange(0, halfspan, 0.5)
+yvalues = np.arange(0, halfspan, 0.1)
 
 yCl_result = yCl(ylst, Cllst)
 ychord_result = ychord(ylst, chordlst)
@@ -62,7 +62,7 @@ def Ldistribution(x):
     return yCl_result(x) * q * ychord_result(x)
 
 def pointload():
-    totallift, error = sp.integrate.quad(Ldistribution, 0, halfspan, limit=1000)
+    totallift, _ = sp.integrate.quad(Ldistribution, 0, halfspan, limit=1000)
     return totallift
 
 def moment():
@@ -88,7 +88,15 @@ for element in yvalues:
 # Plot shear and moment distributions
 plt.subplot(1,2,1)
 plt.plot(yvalues, sheardistributionlst, 'b')
-plt.subplot(1,2,2)
-plt.plot(yvalues, momentdistributionlst, 'b')
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Shear [N]')
+plt.title('Shear distribution')
 
+plt.subplot(1,2,2)
+plt.plot(yvalues, momentdistributionlst, 'g')
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Moment [Nm]')
+plt.title('Moment distribution')
+
+plt.subplots_adjust(wspace=0.5)
 plt.show()
