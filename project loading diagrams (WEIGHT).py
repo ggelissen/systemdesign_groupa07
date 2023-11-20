@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 ## assumed coordinate system: x forward (pointing to nose), y to the right (pointing to wingtip), z downwards
 
 ## three components: dry Ww, fuel, engine 
-b = 66.9 #m
+b = 67 #m
 Ww = 38229.5/2 #kg
 Wf = (125407 + 522.9)/2 #kg
-Weng = 6033 #kg 
+Weng = 6033 + 3127.482/2 #kg 
 grav = 9.81 #m/s^2
 
 y_vals = np.arange(0, b/2, 0.5)
