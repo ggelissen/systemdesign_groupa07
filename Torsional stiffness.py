@@ -75,11 +75,11 @@ def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
       2: I_2,
    }
    return integrand.get(option, None)
-def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_5):
-   #L_5 length of the double cell wing box
-   twist_angle_at_L_5 = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,L_5)
-   if y > L_5:
-      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1),L_5,y) + twist_angle_at_L_5
+def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_4):
+   #L_4 length of the double cell wing box
+   twist_angle_at_L_4 = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,L_4)
+   if y > L_4:
+      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1),L_4,y) + twist_angle_at_L_4
       return theta[0]
    else:
       theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,y)
