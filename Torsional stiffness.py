@@ -99,7 +99,7 @@ torque=[862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.33869958
 def chord(y):
    c_root = 13.4
    c_tip = 3.8
-   half_span = 31.95
+   half_span = 33.45
    m = (c_tip - c_root) / half_span
    return c_root + (m * y)
 y_vals = np.arange(0, b/2, 0.5)
