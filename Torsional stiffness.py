@@ -1,4 +1,3 @@
-#Merge this file under the Rimaz's code
 #Find torsional stiffness distribution for single-cell wing box k(y) over the half wing span by St Venant’s torsion constant
 #Find constant angle
 import math
@@ -68,7 +67,7 @@ def torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y,G):
    return G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)/y
 #-----------------------------------------------------------------------------------------------------------------------------
 import scipy as sp
-def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
+def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option,T):
    G=G
    T_1 = T / (G * torsional_constant_1(t_1,t_11,t_2,t_3,L_1,L_2))
    T_2 = T / (G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G))
@@ -92,14 +91,14 @@ t_2=float(input('Enter t2: '))
 t_3=float(input('Enter t3: '))
 t_4=float(input('Enter t4: '))
 L_4=float(input('Enter L4: '))
-G=float(input('Enter G: '))
+G=26000000000
 integrands=[]
 twist_angles=[]
 torque=[862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 def chord(y):
    c_root = 13.4
    c_tip = 3.8
-   half_span = 31.95
+   half_span = 33.45
    m = (c_tip - c_root) / half_span
    return c_root + (m * y)
 y_vals = np.arange(0, b/2, 0.5)
@@ -112,7 +111,10 @@ for i in range(len(y_vals)):
    L_3 = float(0.35 * chord(y_vals[i]))
    c=float(y_vals[i])
    T=float(torque[i])
-   integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
+   if y_vals[i] <= L_4:
+      integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))
+   else:
+      integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
    #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
 integral_values = sp.integrate.cumtrapz(integrands, x=y_vals, initial=0)
-
+integral_values = integral_values*180/math.pi
