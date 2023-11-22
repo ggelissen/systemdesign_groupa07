@@ -4,7 +4,7 @@ from scipy import interpolate
 from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
-
+from delflection import I_xfinal
 
 # Read the CSV file
 data = []
@@ -101,3 +101,5 @@ plt.title('Moment distribution')
 
 plt.subplots_adjust(wspace=0.5)
 plt.show()
+
+print(I_xfinal(0))
