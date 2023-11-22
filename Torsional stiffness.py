@@ -111,7 +111,7 @@ for i in range(len(y_vals)):
    L_3 = float(0.35 * chord(y_vals[i]))
    c=float(y_vals[i])
    T=float(torque[i])
-   if L_4 <= y_vals[i]:
+   if y_vals[i] <= L_4:
       integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))
    else:
       integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
