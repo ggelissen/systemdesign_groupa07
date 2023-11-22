@@ -1,4 +1,3 @@
-#Merge this file under the Rimaz's code
 #Find torsional stiffness distribution for single-cell wing box k(y) over the half wing span by St Venant’s torsion constant
 #Find constant angle
 import math
