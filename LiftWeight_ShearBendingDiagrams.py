@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
+
 # Read the CSV file
 data = []
 with open('A07csv3.csv', 'r') as file:
