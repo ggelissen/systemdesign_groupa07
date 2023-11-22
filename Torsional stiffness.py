@@ -115,4 +115,4 @@ for i in range(len(y_vals)):
    integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
    #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
 integral_values = sp.integrate.cumtrapz(integrands, x=y_vals, initial=0)
-
+integral_values = integral_values*180/math.pi
