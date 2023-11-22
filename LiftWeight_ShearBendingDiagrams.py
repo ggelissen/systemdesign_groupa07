@@ -14,7 +14,7 @@ with open('A07csv3.csv', 'r') as file:
 
 # Defined constants
 rho = 1.225
-v = 10
+v = 242
 q = 0.5*rho*(v**2)
 halfspan = 33.5
 centroid = 14.4486

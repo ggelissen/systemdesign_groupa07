@@ -36,10 +36,10 @@ def closest(lst, val): #finding item in list closest to val
 
 torque = []
 for element in y_vals :
-    if element <= closest(y_vals, (b/2)*0.35):
+    if element <= closest(y_vals, (b/2)*0.35) and element > 0:
         torque.append(Tw+Tt)
-    if element > closest(y_vals, (b/2)*0.35):
+    if element > closest(y_vals, (b/2)*0.35) or element == 0:
         torque.append(0)
-        
+
 plt.plot(y_vals, torque)
 plt.show()
