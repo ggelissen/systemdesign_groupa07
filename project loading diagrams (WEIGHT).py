@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 ## assumed coordinate system: x forward (pointing to nose), y to the right (pointing to wingtip), z downwards
 
 ## three components: dry Ww, fuel, engine 
-b = 67 #m
+b = 66.9 #m
 Ww = 38229.5/2 #kg
 Wf = (125407 + 522.9)/2 #kg
-Weng = 6033 + 3127.482/2 #kg 
+Weng = 6033 #kg 
 grav = 9.81 #m/s^2
 
 y_vals = np.arange(0, b/2, 0.5)
@@ -43,10 +43,9 @@ def fueldistr(y):
     Wf = (125407 + 522.9)/2 #kg
     grav = 9.81 #m/s^2
     g = 0 
-    
-    if y < b/4: 
+    if y < b/4 and y > 0: 
         g = Wf*grav/(b/4)
-    if y > b/4:
+    if y > b/4 or y == 0:
         g = 0 
     return g
     
@@ -83,14 +82,17 @@ def sheardistribution(y):
     return shear 
 
 for element in y_vals:
-    cts_sheardistr.append(sheardistribution(element))
+    if element == 0:
+        cts_sheardistr.append(0)
+    if element > 0:
+        cts_sheardistr.append(sheardistribution(element))
 
 engshear = []
 ## assuming the shear is a constants function due to a point force
 for element in y_vals: 
-    if element <= closest(y_vals, (b/2)*0.35): 
+    if element <= closest(y_vals, (b/2)*0.35) and element >0: 
         engshear.append(Weng*grav)
-    if element > closest(y_vals, (b/2)*0.35):
+    if element > closest(y_vals, (b/2)*0.35) or element == 0:
         engshear.append(0)
     
 shear = np.array(cts_sheardistr) + np.array(engshear) ##ALL SHEAR CAUSED BY WEIGHT
@@ -103,14 +105,17 @@ def momentdistribution(y):
     return -moment # since the moment is the negative integral of shear
 
 for element in y_vals:
-    cts_momentdistr.append(momentdistribution(element))
+    if element == 0:
+        cts_momentdistr.append(0)
+    if element > 0:
+        cts_momentdistr.append(momentdistribution(element))
     
 engmoment = []
 ## assuming Msh = Ma - P*g (where p is the load, in this case Weng*grav, and Ma is p*L with L being the moment arm)
 for element in y_vals:
-    if element <= closest(y_vals, (b/2)*0.35):
+    if element <= closest(y_vals, (b/2)*0.35) and element > 0:
         engmoment.append(Weng*grav*(element - (0.35*0.5*b)))
-    if element > closest(y_vals, (b/2)*0.35):
+    if element > closest(y_vals, (b/2)*0.35) or element == 0:
         engmoment.append(0)
 
 
@@ -124,4 +129,5 @@ plt.plot(y_vals,shear, label = "shear*EI")
 plt.plot(y_vals, moment, label = "moment*EI")
 plt.legend()
 plt.show()
+## add axis label -> yshear = N, ymoment = Nm, x = chord 
     

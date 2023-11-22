@@ -3,9 +3,9 @@
 #Find constant angle
 #import math
 #upper
-alpha = math.acos(h_length/l_up)
+alpha = math.acos(0.5/0.5004620365222)
 #lower
-beta = math.acos(h_length/l_low)
+beta = math.acos(0.5/0.5003958533001)
 # Find Am
 def enclosed_area_1(t_1,t_11,t_2,t_3,L_1,L_2):
    #thickness of front spar, thickness of the rear spar, thickness of upper plate, thickness of lower plate, width, length of front spar, length of rear spar
@@ -43,16 +43,16 @@ def length_of_middle_spar(L_1,L_3,t_2,t_3):
    return L_1 - L_3 * math.sin(alpha) - L_3 * math.sin(beta) - t_2 * math.cos(alpha) / 2 - t_3 * math.cos(alpha) / 2
 def enclosed_area_2(t_1,t_2,t_3,L_1,L_3):
    #L_3 is the distance from the front spar to midline of middle spar
-   return (L_3 - t_1 / 2) *Length_of_middle_spar(L_1,L_3,t_2,t_3)/2
+   return (L_3 - t_1 / 2) *length_of_middle_spar(L_1,L_3,t_2,t_3)/2
 def enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3):
-   return Enclosed_area_1(t_1,t_11,t_2,t_3,L_1,L_2) - Enclosed_area_2(t_1,t_2,t_3,L_1,L_3)
+   return enclosed_area_1(t_1,t_11,t_2,t_3,L_1,L_2) - enclosed_area_2(t_1,t_2,t_3,L_1,L_3)
 def rate_of_twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    #t_4 is the thickness of middle spar
-   coeff =  [line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2)/t_1 + (L_3 / math.cos(beta) - t_1 / (2 * math.cos(beta))/t_3 + length_of_middle_spar(L_1,L_3,t_2,t_3) /t_4 + (L_3 / math.cos(alpha) - t_1 / (2 * math.cos(alpha)))/t_2 , -length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4]
+   coeff =  [line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2)/t_1 + (L_3 / math.cos(beta) - t_1 / (2 * math.cos(beta)))/t_3 + length_of_middle_spar(L_1,L_3,t_2,t_3) /t_4 + (L_3 / math.cos(alpha) - t_1 / (2 * math.cos(alpha)))/t_2 , -length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4]
    coeff.append(-2 * enclosed_area_2(t_1,t_2,t_3,L_1,L_3) * G)
    return coeff
 def rate_of_twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
-   coeff =  [-length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 , line_integral(t_1,t_11,t_2,t_3,L_1,L_2,3)/t_11 + (l_up - L_3 / math.cos(alpha) - t_11 / (2 * math.cos(alpha))/t_2 + length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 + (l_low - L_3 / math.cos(beta) - t_11 / (2 * math.cos(beta))/t_3]
+   coeff =  [-length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 , line_integral(t_1,t_11,t_2,t_3,L_1,L_2,3)/t_11 + (l_up - L_3 / math.cos(alpha) - t_11 / (2 * math.cos(alpha)))/t_2 + length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 + (l_low - L_3 / math.cos(beta) - t_11 / (2 * math.cos(beta)))/t_3]
    coeff.append(-2 * enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3) * G)
    return coeff
 def rate_of_twist_value(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
@@ -62,17 +62,19 @@ def rate_of_twist_value(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    solution = np.linalg.solve(matrix,righthandside)
    return solution[2]
 def torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
+   G=G
    return 1/(rate_of_twist_value(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)*G)
 def torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y,G):
    return G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)/y
 #-----------------------------------------------------------------------------------------------------------------------------
 #import scipy as sp
 def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
+   G=G
    T_1 = T / (G * torsional_constant_1(t_1,t_11,t_2,t_3,L_1,L_2))
    T_2 = T / (G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G))
    integrand = {
       1: T_1,
-      2: I_2,
+      2: T_2,
    }
    return integrand.get(option, None)
 def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_4):
