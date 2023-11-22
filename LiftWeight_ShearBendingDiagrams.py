@@ -103,3 +103,16 @@ plt.subplots_adjust(wspace=0.5)
 plt.show()
 
 print(I_xfinal(0))
+E = 68.9 * 10**9
+
+def load_integrand(y):
+    return (momentdistribution(y) * -1) / (I_xfinal(y) * E)
+
+def deflection(y):
+    def load(y):
+        return integrate.quad(load_integrand, 0, y)[0]
+
+    deflection_result = integrate.quad(load, 0, y)[0]
+    return deflection_result
+
+print(deflection(33))

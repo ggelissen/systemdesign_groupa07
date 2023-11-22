@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from LiftWeight_ShearBendingDiagrams import momentdistribution
+#from LiftWeight_ShearBendingDiagrams import momentdistribution
 from scipy import integrate
 
 
@@ -134,20 +134,3 @@ def I_xfinal(y):
 
 
 print(I_xfinal(0))
-
-print(momentdistribution(1))
-
-E = 68.9 * 10**9
-
-def load_integrand(y):
-    return (momentdistribution(y) * -1) / (I_xfinal(y) * E)
-
-def deflection(y):
-    def load(y):
-        return integrate.quad(load_integrand, 0, y)[0]
-
-    deflection_result = integrate.quad(load, 0, y)[0]
-    return deflection_result
-
-print(deflection(33))
-
