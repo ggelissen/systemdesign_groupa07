@@ -3,9 +3,9 @@
 #Find constant angle
 #import math
 #upper
-alpha = math.acos(h_length/l_up)
+alpha = math.acos(0.5/0.25092279689)
 #lower
-beta = math.acos(h_length/l_low)
+beta = math.acos(0.5/0.2507907693676)
 # Find Am
 def enclosed_area_1(t_1,t_11,t_2,t_3,L_1,L_2):
    #thickness of front spar, thickness of the rear spar, thickness of upper plate, thickness of lower plate, width, length of front spar, length of rear spar
