@@ -77,15 +77,36 @@ def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
       2: T_2,
    }
    return integrand.get(option, None)
-def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_4):
-   #L_4 length of the double cell wing box
-   twist_angle_at_L_4 = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,L_4)
-   if y > L_4:
-      angle_diff = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1),L_4,y)
-      theta = angle_diff[0] + twist_angle_at_L_4
-      return theta
-   else:
-      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2),0,y)
-      return theta[0]
-
+##def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_4,T):
+##   #L_4 length of the double cell wing box
+##   if y > L_4:
+##      angle_diff = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T),y-0.5,y)
+##      theta = angle_diff[0] + sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T),L_4-0.5,L_4)
+##      return float(theta)
+##   else:
+##      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T),y-0.5,y)
+##      return float(theta[0])
+t_1=float(input('Enter t1: '))
+t_11=float(input('Enter t11: '))
+t_2=float(input('Enter t2: '))
+t_3=float(input('Enter t3: '))
+t_4=float(input('Enter t4: '))
+L_4=float(input('Enter L4: '))
+G=float(input('Enter G: '))
+integrands=[]
+twist_angles=[]
+def func(y):
+   return 900 - 2*y
+for i in range(len(y_vals)):
+   h_length = float(0.5*func(y_vals[i]))
+   l_up=float(0.5004620365222*func(y_vals[i]))
+   l_low=float(0.5003958533001*func(y_vals[i]))
+   L_1 = float(0.1082 * func(y_vals[i]))
+   L_2= float(0.0668 * func(y_vals[i]))
+   L_3 = float(0.35 * func(y_vals[i]))
+   c=float(y_vals[i])
+   T=float(torque[i])
+   integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
+   #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
+integral_values = sp.integrate.cumtrapz(integrands, x=y_vals, initial=0)
 
