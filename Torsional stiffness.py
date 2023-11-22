@@ -43,9 +43,9 @@ def length_of_middle_spar(L_1,L_3,t_2,t_3):
    return L_1 - L_3 * math.sin(alpha) - L_3 * math.sin(beta) - t_2 * math.cos(alpha) / 2 - t_3 * math.cos(alpha) / 2
 def enclosed_area_2(t_1,t_2,t_3,L_1,L_3):
    #L_3 is the distance from the front spar to midline of middle spar
-   return (L_3 - t_1 / 2) *Length_of_middle_spar(L_1,L_3,t_2,t_3)/2
+   return (L_3 - t_1 / 2) *length_of_middle_spar(L_1,L_3,t_2,t_3)/2
 def enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3):
-   return Enclosed_area_1(t_1,t_11,t_2,t_3,L_1,L_2) - Enclosed_area_2(t_1,t_2,t_3,L_1,L_3)
+   return enclosed_area_1(t_1,t_11,t_2,t_3,L_1,L_2) - enclosed_area_2(t_1,t_2,t_3,L_1,L_3)
 def rate_of_twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    #t_4 is the thickness of middle spar
    coeff =  [line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2)/t_1 + (L_3 / math.cos(beta) - t_1 / (2 * math.cos(beta)))/t_3 + length_of_middle_spar(L_1,L_3,t_2,t_3) /t_4 + (L_3 / math.cos(alpha) - t_1 / (2 * math.cos(alpha)))/t_2 , -length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4]
