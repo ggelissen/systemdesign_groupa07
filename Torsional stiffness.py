@@ -68,7 +68,7 @@ def torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y,G):
    return G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)/y
 #-----------------------------------------------------------------------------------------------------------------------------
 import scipy as sp
-def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
+def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option,T):
    G=G
    T_1 = T / (G * torsional_constant_1(t_1,t_11,t_2,t_3,L_1,L_2))
    T_2 = T / (G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G))
