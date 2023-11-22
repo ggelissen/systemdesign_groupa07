@@ -74,7 +74,7 @@ def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
    T_2 = T / (G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G))
    integrand = {
       1: T_1,
-      2: I_2,
+      2: T_2,
    }
    return integrand.get(option, None)
 def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_4):
