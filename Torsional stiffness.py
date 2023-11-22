@@ -1,7 +1,7 @@
 #Merge this file under the Rimaz's code
 #Find torsional stiffness distribution for single-cell wing box k(y) over the half wing span by St Venant’s torsion constant
 #Find constant angle
-#import math
+import math
 #upper
 alpha = math.acos(0.5/0.5004620365222)
 #lower
@@ -56,7 +56,7 @@ def rate_of_twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    coeff.append(-2 * enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3) * G)
    return coeff
 def rate_of_twist_value(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
-   #import numpy as np
+   import numpy as np
    matrix = np.array([[2*enclosed_area_2(t_1,t_2,t_3,L_1,L_3),2*enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3),0.],rate_of_twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G),rate_of_twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)])
    righthandside = np.array([1.,0.,0.])
    solution = np.linalg.solve(matrix,righthandside)
@@ -67,7 +67,7 @@ def torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
 def torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y,G):
    return G * torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)/y
 #-----------------------------------------------------------------------------------------------------------------------------
-#import scipy as sp
+import scipy as sp
 def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option):
    G=G
    T_1 = T / (G * torsional_constant_1(t_1,t_11,t_2,t_3,L_1,L_2))
@@ -95,15 +95,21 @@ L_4=float(input('Enter L4: '))
 G=float(input('Enter G: '))
 integrands=[]
 twist_angles=[]
-def func(y):
-   return 900 - 2*y
+torque=[862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 862221.3386995868, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+def chord(y):
+   c_root = 13.4
+   c_tip = 3.8
+   half_span = 31.95
+   m = (c_tip - c_root) / half_span
+   return c_root + (m * y)
+y_vals = np.arange(0, b/2, 0.5)
 for i in range(len(y_vals)):
-   h_length = float(0.5*func(y_vals[i]))
-   l_up=float(0.5004620365222*func(y_vals[i]))
-   l_low=float(0.5003958533001*func(y_vals[i]))
-   L_1 = float(0.1082 * func(y_vals[i]))
-   L_2= float(0.0668 * func(y_vals[i]))
-   L_3 = float(0.35 * func(y_vals[i]))
+   h_length = float(0.5*chord(y_vals[i]))
+   l_up=float(0.5004620365222*chord(y_vals[i]))
+   l_low=float(0.5003958533001*chord(y_vals[i]))
+   L_1 = float(0.1082 * chord(y_vals[i]))
+   L_2= float(0.0668 * chord(y_vals[i]))
+   L_3 = float(0.35 * chord(y_vals[i]))
    c=float(y_vals[i])
    T=float(torque[i])
    integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
