@@ -139,7 +139,6 @@ t_3=float(input('Enter t3[m]: '))
 t_4=float(input('Enter t4[m]: '))
 L_4=float(input('Enter L4[m]: '))
 G=26000000000 #Pa
-integrands=[]
 
 def chord(y):
    c_root = 13.4
@@ -147,6 +146,8 @@ def chord(y):
    half_span = 33.45
    m = (c_tip - c_root) / half_span
    return c_root + (m * y)
+
+integrands=[]
 x_limit=[]
 for i in range(len(y_vals)):
     h_length = float(0.5*chord(y_vals[i]))
