@@ -88,26 +88,28 @@ def torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,y,G):
 #Find length of the middle spar
 def length_of_middle_spar(L_1,L_3,t_2,t_3):
    #L_3 is the distance from the front spar to midline of middle spar
-   return L_1 - L_3 * math.sin(alpha) - L_3 * math.sin(beta) - t_2 * math.cos(alpha) / 2 - t_3 * math.cos(alpha) / 2
+   return L_1 - L_3 * math.tan(alpha) - L_3 * math.tan(beta) - t_2 / (math.cos(alpha) * 2) - t_3 /( math.cos(alpha) * 2 )
 def enclosed_area_2(t_1,t_2,t_3,L_1,L_3):
    #L_3 is the distance from the front spar to midline of middle spar
-   return (L_3 - t_1 / 2) *length_of_middle_spar(L_1,L_3,t_2,t_3)/2
+   return (L_3 - t_1 / 2) * (L_1 - t_1 * math.tan(alpha) / 2 - t_2 * math.cos(alpha) / 2 - t_1 * math.tan(beta) / 2 - t_3 * math.cos(beta) / 2 + length_of_middle_spar(L_1,L_3,t_2,t_3))/2
 def enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3):
    return enclosed_area_1(t_1,t_11,t_2,t_3,L_1,L_2) - enclosed_area_2(t_1,t_2,t_3,L_1,L_3)
 def rate_of_twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    #t_4 is the thickness of middle spar
-   coeff =  [line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2)/t_1 + (L_3 / math.cos(beta) - t_1 / (2 * math.cos(beta)))/t_3 + length_of_middle_spar(L_1,L_3,t_2,t_3) /t_4 + (L_3 / math.cos(alpha) - t_1 / (2 * math.cos(alpha)))/t_2 , -length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4]
-   coeff.append(-2 * enclosed_area_2(t_1,t_2,t_3,L_1,L_3) * G)
+   coeff =  np.array([line_integral(t_1,t_11,t_2,t_3,L_1,L_2,2) + (L_3 / math.cos(beta) - t_1 / (2 * math.cos(beta)))/t_3 + length_of_middle_spar(L_1,L_3,t_2,t_3) /t_4 + (L_3 / math.cos(alpha) - t_1 / (2 * math.cos(alpha)))/t_2 , -length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4])
+   coeff = coeff / (2 * enclosed_area_2(t_1,t_2,t_3,L_1,L_3) * G)
+   coeff = np.append(coeff, -1.)
    return coeff
 def rate_of_twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
-   coeff =  [-length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 , line_integral(t_1,t_11,t_2,t_3,L_1,L_2,3)/t_11 + (l_up - L_3 / math.cos(alpha) - t_11 / (2 * math.cos(alpha)))/t_2 + length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 + (l_low - L_3 / math.cos(beta) - t_11 / (2 * math.cos(beta)))/t_3]
-   coeff.append(-2 * enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3) * G)
+   coeff =  np.array([-length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 , line_integral(t_1,t_11,t_2,t_3,L_1,L_2,3) + (l_up - L_3 / math.cos(alpha) - t_11 / (2 * math.cos(alpha)))/t_2 + length_of_middle_spar(L_1,L_3,t_2,t_3)/t_4 + (l_low - L_3 / math.cos(beta) - t_11 / (2 * math.cos(beta)))/t_3])
+   coeff = coeff / (2 * enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3) * G)
+   coeff = np.append(coeff, -1.)
    return coeff
 def rate_of_twist_value(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    matrix = np.array([[2*enclosed_area_2(t_1,t_2,t_3,L_1,L_3),2*enclosed_area_3(t_1,t_11,t_2,t_3,L_1,L_2,L_3),0.],rate_of_twist_1(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G),rate_of_twist_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)])
    righthandside = np.array([1.,0.,0.])
    solution = np.linalg.solve(matrix,righthandside)
-   return solution[2]
+   return abs(solution[2])
 def torsional_constant_2(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G):
    G=G
    return 1/(rate_of_twist_value(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G)*G)
@@ -147,6 +149,7 @@ def chord(y):
    m = (c_tip - c_root) / half_span
    return c_root + (m * y)
 
+torsional_stiffness=[]
 integrands=[]
 x_limit=[]
 for i in range(len(y_vals)):
@@ -156,7 +159,6 @@ for i in range(len(y_vals)):
     L_1 = float(0.1082 * chord(y_vals[i]))
     L_2= float(0.0668 * chord(y_vals[i]))
     L_3 = float(0.35 * chord(y_vals[i]))
-    c=float(y_vals[i])
     T=float(torque[i])
     if y_vals[i] <= L_4 and T != 0.:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))
@@ -164,11 +166,24 @@ for i in range(len(y_vals)):
     elif y_vals[i] > L_4 and T != 0.:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
         x_limit.append(y_vals[i])
+    if y_vals[i] <= L_4 and y_vals[i] != 0:
+        torsional_stiffness.append(torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y_vals[i],G))
+    elif y_vals[i] > L_4:
+        torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,y_vals[i],G))
 
    #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
 integral_values = sp.integrate.cumtrapz(integrands, x=x_limit, initial=0)
 integral_values = integral_values*180/math.pi
 while len(integral_values) < len(y_vals):
     integral_values = np.append(integral_values, max(integral_values))
+plt.plot(y_vals[1:],torsional_stiffness)
+plt.title("Torsional Stiffness diagram")
+plt.ylabel("Torsional Stiffness")
+plt.xlabel("Half Span[m]")
+plt.show()
+
 plt.plot(y_vals, integral_values)
+plt.title("Twist angle diageram")
+plt.ylabel("twist angle[deg]")
+plt.xlabel("Half Span[m]")
 plt.show()
