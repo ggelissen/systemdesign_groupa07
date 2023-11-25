@@ -139,6 +139,7 @@ t_11=float(input('Enter t11[m]: '))
 t_2=float(input('Enter t2[m]: '))
 t_3=float(input('Enter t3[m]: '))
 t_4=float(input('Enter t4[m]: '))
+spac=float(input('Enter Spacing between L_1 and L_3[x/c]: '))
 L_4=float(input('Enter L4[m]: '))
 G=26000000000 #Pa
 
@@ -158,7 +159,7 @@ for i in range(len(y_vals)):
     l_low=float(0.5003958533001*chord(y_vals[i]))
     L_1 = float(0.1082 * chord(y_vals[i]))
     L_2= float(0.0668 * chord(y_vals[i]))
-    L_3 = float(0.35 * chord(y_vals[i]))
+    L_3 = float(spac * chord(y_vals[i]))
     T=float(torque[i])
     if y_vals[i] <= L_4 and T != 0.:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))
