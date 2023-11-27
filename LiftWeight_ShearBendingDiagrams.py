@@ -15,10 +15,11 @@ with open('A07csv3.csv', 'r') as file:
 
 # Defined constants
 rho = 1.225
-v = 242
+v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
 centroid = 14.4486
+n = 2.5
 
 # Create arrays for the values in the CSV file
 ylst = np.array([])
@@ -60,7 +61,7 @@ yCmc4_result = yCmc4(ylst, Cmc4lst)
 
 # Functions to calculate distributed load an point load
 def Ldistribution(x):
-    return yCl_result(x) * q * ychord_result(x)
+    return yCl_result(x) * q * ychord_result(x) * n
 
 def pointload():
     totallift, _ = sp.integrate.quad(Ldistribution, 0, halfspan, limit=1000)
