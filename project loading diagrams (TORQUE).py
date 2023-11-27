@@ -152,7 +152,6 @@ def chord(y):
 
 torsional_stiffness=[]
 integrands=[]
-x_limit=[]
 for i in range(len(y_vals)):
     h_length = float(0.5*chord(y_vals[i]))
     l_up=float(0.5004620365222*chord(y_vals[i]))
@@ -163,20 +162,17 @@ for i in range(len(y_vals)):
     T=float(torque[i])
     if y_vals[i] <= L_4 and T != 0.:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))
-        x_limit.append(y_vals[i])
     elif y_vals[i] > L_4 and T != 0.:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
-        x_limit.append(y_vals[i])
     if y_vals[i] <= L_4 and y_vals[i] != 0:
         torsional_stiffness.append(torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y_vals[i],G))
     elif y_vals[i] > L_4:
         torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,y_vals[i],G))
 
    #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
-integral_values = sp.integrate.cumtrapz(integrands, x=x_limit, initial=0)
+integral_values = sp.integrate.cumtrapz(integrands, x=y_vals, initial=0)
 integral_values = integral_values*180/math.pi
-while len(integral_values) < len(y_vals):
-    integral_values = np.append(integral_values, max(integral_values))
+
 plt.plot(y_vals[1:],torsional_stiffness)
 plt.title("Torsional Stiffness diagram")
 plt.ylabel("Torsional Stiffness")
