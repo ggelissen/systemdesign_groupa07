@@ -4,7 +4,6 @@ from scipy import interpolate
 from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
-from delflection import I_xfinal  # Assuming delflection module is defined
 
 def main():
     # Read the CSV file
