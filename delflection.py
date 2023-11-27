@@ -42,13 +42,13 @@ def calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y):
     return np.sum(I_x)
 
 # Input values
-t_1 = float(input('Enter the spar thickness: '))
-w_u1 = float(input('Enter the thickness of upper skin: '))
-w_d1 = float(input('Enter the thickness of lower skin: '))
-A1 = float(input('Enter the area of the stringers: '))
-n_str1 = int(input('Enter the number of stringers: '))
-y = float(input('Enter the spanwise position: '))
+    t_1 = float(input('Enter the spar thickness: '))
+    w_u1 = float(input('Enter the thickness of upper skin: '))
+    w_d1 = float(input('Enter the thickness of lower skin: '))
+    A1 = float(input('Enter the area of the stringers: '))
+    n_str1 = int(input('Enter the number of stringers: '))
+    y = float(input('Enter the spanwise position: '))
 
-# Calculate moment of inertia
-moment_of_inertia = calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y)
-print("Moment of Inertia:", moment_of_inertia)
+    # Calculate moment of inertia
+    moment_of_inertia = calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y)
+    print("Moment of Inertia:", moment_of_inertia)
