@@ -104,7 +104,7 @@ plt.show()
 
 print(I_xfinal(0))
 E = 68.9 * 10**9
-
+'''
 def load_integrand(y):
     return (momentdistribution(y) * -1) / (I_xfinal(y) * E)
 
@@ -115,4 +115,4 @@ def deflection(y):
     deflection_result = integrate.quad(load, 0, y)[0]
     return deflection_result
 
-print(deflection(33))
+print(deflection(33))'''

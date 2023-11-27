@@ -1,136 +1,54 @@
-import math
 import numpy as np
-import matplotlib.pyplot as plt
-#from LiftWeight_ShearBendingDiagrams import momentdistribution
-from scipy import integrate
 
-
-t_1 = float(input('Enter the spar thickness: '))
-w_u1 = float(input('Enter the thickness of upper skin: '))
-w_d1 = float(input('Enter the thickness of lower skin: '))
-A1 = float(input('Enter the area of the stringers: '))
-n_str1 = int(input('Enter the number of stringers: '))
-
-def I_xfinal(y):
+def calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y):
+    # Constants
     c_root = 13.4
     c_tip = 3.8
     half_span = 33.45
     m = (c_tip - c_root) / half_span
 
+    # Wing geometry
     c = c_root + (m * y)
-    #c = float(input('Enter the chord length: '))
-
-    #Contant throughout geometry
     f_spar = 0.1082 * c
     r_spar = 0.0668 * c
-    h_length = 0.5 * c
 
-
-    #Values to be inputted
+    # Dimension multipliers
     t = t_1 * c
     w_u = w_u1 * c
     w_d = w_d1 * c
-    A = A1
-    n_str = n_str1
 
-    X_c = 0
-    Z_c = 0
-
-    # Semi-constant values
-    x_4 = 0.5 * c * 0.5
-    x_3 = 0.5 * c * 0.5
-    x_2 = 0.5 * c
-    x_1 = 0
-
-    x_centroids = np.array([x_1, x_2, x_3, x_4])
-    Q_xcentroid = np.zeros(4)
-
-    z_up = f_spar - ((0.0665 - 0.0450) * c * 0.5)
-    z_low = (0.0417 - 0.0218) * c * 0.5
-    z_1 = 0.5 * f_spar
-    z_2 = (0.0417 * c) + (0.5 * 0.0450 * c)
-    z_str1 = z_up  # assumption that it's almost horizontal
-    z_str2 = z_low  # same horizontal assumption
-
-    l_up = math.sqrt((0.5 * c)**2 + ((0.0665 - 0.0450) * c)**2)
-    l_low = math.sqrt((0.5 * c)**2 + ((0.0417 - 0.0218) * c)**2)
-
-    z_centroids = np.array([z_1, z_2, z_up, z_low])
-    Q_zcentroid = np.zeros(4)
-
-    l_parts = np.array([f_spar, r_spar, l_up, l_low])
+    # Centroids and areas
+    x_centroids = np.array([0, 0.5 * c, 0.5 * c, 0.5 * c * 0.5])
+    z_centroids = np.array([0.5 * f_spar, (0.0417 * c) + (0.5 * 0.0450 * c), f_spar - ((0.0665 - 0.0450) * c * 0.5), (0.0417 - 0.0218) * c * 0.5])
+    l_parts = np.array([f_spar, r_spar, np.sqrt((0.5 * c)**2 + ((0.0665 - 0.0450) * c)**2), np.sqrt((0.5 * c)**2 + ((0.0417 - 0.0218) * c)**2)])
     t_parts = np.array([t, t, w_u, w_d])
-    Area_parts = np.zeros(4)
-
-    # Function to obtain product of centroid and area
-    def Q_x(l, t, d):
-        A = l * t
-        Q = l * t * d
-        return Q, A
-
-    # Obtain Qx and A for all parts w/o stringer
-    for i in range(4):
-        Q_xcentroid[i] = Q_x(l_parts[i], t_parts[i], x_centroids[i])[0]
-        Area_parts[i] = Q_x(l_parts[i], t_parts[i], x_centroids[i])[1]
-
-    # Obtain Qz for all parts w/o stringer
-    for i in range(4):
-        Q_zcentroid[i] = Q_x(l_parts[i], t_parts[i], z_centroids[i])[0]
-
-    # Qz with stringer
-    for i in range(n_str):
-        Q1 = A * z_str1
-        Q2 = A * z_str2
-        Q_zcentroid = np.append(Q_zcentroid, [Q1])
-        Q_zcentroid = np.append(Q_zcentroid, [Q2])
-        Area_parts = np.append(Area_parts, [A])
-        Area_parts = np.append(Area_parts, [A])
-
-    # Qx with stringer
-    for i in range(n_str):
-        x = i * ((0.5 * c) / (n_str - 1))
-        Q1 = A * x  # accounting for both lower and upper
-        Q_xcentroid = np.append(Q_xcentroid, [Q1])
-        Q_xcentroid = np.append(Q_xcentroid, [Q1])
-
-    # Function to obtain centroid of the whole system
-    def centroid(Q, A):
-        d = sum(Q) / sum(A)
-        return d
-
-    X_c = centroid(Q_xcentroid, Area_parts)
-    Z_c = centroid(Q_zcentroid, Area_parts)
-    #print(Z_c)
-
-    I = 0
-
-    def A_moi(l,h,d):
-        I_xx = (l * h**3)/12  # Assuming top almost rectangular
-        par_thm = (l * h) * (d**2)
-        I = I_xx + par_thm
-        return I
-
-    l_x = np.array([t, t, l_up, l_low])
+    l_x = np.array([t, t, np.sqrt((0.5 * c)**2 + ((0.0665 - 0.0450) * c)**2),np.sqrt((0.5 * c)**2 + ((0.0417 - 0.0218) * c)**2) ])
     h_x = np.array([f_spar, r_spar, w_u, w_d])
 
-    def I_str(n,A):
-        I_1 = n * (A * ((z_str1 - Z_c) **2))
-        I_2 = n * (A * ((z_str2 - Z_c)**2))
-        I = I_1 + I_2
-        return I
-
+    # Moment of inertia calculation
     I_x = np.zeros(4)
-
+    centroid_x = np.sum(x_centroids * (l_parts * t_parts)) / np.sum(l_parts * t_parts)
+    centroid_z = np.sum(z_centroids * (l_parts * t_parts)) / np.sum(l_parts * t_parts)
     for i in range(4):
-        z_centroids[i] = z_centroids[i] - Z_c
+        I_x[i] = (l_x[i] * h_x[i]**3 / 12) + (l_parts[i] * t_parts[i]) * ((z_centroids[i] - centroid_z)**2)
 
-    for i in range(4):
-        I_x[i] = A_moi(l_x[i], h_x[i], z_centroids[i])
+    # Stringer contributions
+    z_str1 = f_spar - ((0.0665 - 0.0450) * c * 0.5)
+    z_str2 = (0.0417 - 0.0218) * c * 0.5
+    for i in range(n_str1):
+        I_x = np.append(I_x, A1 * ((z_str1 - centroid_z)**2))
+        I_x = np.append(I_x, A1 * ((z_str2 - centroid_z)**2))
 
-    I_x = np.append(I_x, I_str(n_str,A))
+    return np.sum(I_x)
 
-    I_xx = sum(I_x)
-    return I_xx
+# Input values
+t_1 = float(input('Enter the spar thickness: '))
+w_u1 = float(input('Enter the thickness of upper skin: '))
+w_d1 = float(input('Enter the thickness of lower skin: '))
+A1 = float(input('Enter the area of the stringers: '))
+n_str1 = int(input('Enter the number of stringers: '))
+y = float(input('Enter the spanwise position: '))
 
-
-print(I_xfinal(0))
+# Calculate moment of inertia
+moment_of_inertia = calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y)
+print("Moment of Inertia:", moment_of_inertia)
