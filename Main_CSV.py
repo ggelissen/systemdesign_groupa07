@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
-
 def main():
     # Read the CSV file
     data = []
@@ -102,7 +101,6 @@ def main():
 
     plt.subplots_adjust(wspace=0.5)
     plt.show()
-
 
 if __name__ == "__main__":
     main()
