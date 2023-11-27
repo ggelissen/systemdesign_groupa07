@@ -4,7 +4,6 @@ from scipy import interpolate
 from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
-from delflection import calculate_moment_of_inertia
 
 # Read the CSV file
 data = []
@@ -103,3 +102,4 @@ plt.title('Moment distribution')
 plt.subplots_adjust(wspace=0.5)
 plt.show()
 
+sp.integrate.simps(sheardistributionlst, yvalues)
