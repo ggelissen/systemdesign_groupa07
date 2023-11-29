@@ -59,8 +59,6 @@ for i in range(len(ylst)):
 
 total = np.array(moment) + np.array(torque) ## questioning if the moment eq is correct
 
-print(chord_check)
-print(moment)
 plt.plot(ylst, total)
 plt.show()
 
