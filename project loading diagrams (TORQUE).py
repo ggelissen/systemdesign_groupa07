@@ -210,3 +210,5 @@ plt.show()
 plt.plot(ylst, integral_values)
 plt.title("Twist angle diagram")
 plt.ylabel("twist angle[deg]")
+plt.xlabel("Half Span[m]")
+plt.show
