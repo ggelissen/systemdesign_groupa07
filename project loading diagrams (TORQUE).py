@@ -34,7 +34,7 @@ y_vals = np.arange(0, b/2, 0.5)
 
 """ Torque values """
 #sweepengcen = np.arctan(np.tan(sweep_LE*d2r)-(engcenter/c035)*(2*cr*(1-taper)/b))/d2r #sweep at engine center
-Tw = Weng*grav*((c035/2)-engcenter)
+Tw = Weng*grav*((c035/2)-engcenter)*np.cos(sweep05*d2r)
 
 Tt = np.cos(sweep05*d2r)*T*h
 
