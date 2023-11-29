@@ -7,7 +7,7 @@ import numpy as np
 
 # Read the CSV file
 data = []
-with open('A07csv3.csv', 'r') as file:
+with open('A07csv2.csv', 'r') as file:
     csv_reader = reader(file)
     for row in csv_reader:
         data.append(row)
@@ -22,11 +22,11 @@ n = 2.5
 
 # Create arrays for the values in the CSV file
 ylst = np.array([])
-chordlst = np.array([]) 
-Ailst = np.array([]) 
-Cllst = np.array([]) 
-ICdlst = np.array([]) 
-Cmc4lst = np.array([]) 
+chordlst = np.array([])
+Ailst = np.array([])
+Cllst = np.array([])
+ICdlst = np.array([])
+Cmc4lst = np.array([])
 
 # Append correct values from csv_reader to arrays
 for row in data[51:81]:      # Range can be adjusted here!
@@ -61,45 +61,32 @@ yCmc4_result = yCmc4(ylst, Cmc4lst)
 # Functions to calculate distributed load an point load
 def Ldistribution(x):
     return yCl_result(x) * q * ychord_result(x) * n
+liftdistributionlst = np.array([])
+for element in yvalues:
+    liftdistributionlst = np.append(liftdistributionlst, Ldistribution(element))
 
-def pointload():
-    totallift, _ = sp.integrate.quad(Ldistribution, 0, halfspan, limit=1000)
-    return totallift
-
-def moment():
-    return pointload() * centroid
-
-# Functions to define shear and moment distributions
 def sheardistribution(y):
-    estimateshear , _ = sp.integrate.quad(Ldistribution, y, halfspan, limit=1000)
-    return estimateshear - pointload() if y == 0 else estimateshear
+    shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
+    sheardistributionlst = np.flip(shear)
+    return sheardistributionlst
 
-sheardistributionlst = np.array([])
-for element in yvalues:
-    sheardistributionlst = np.append(sheardistributionlst, sheardistribution(element))
+def momentdistribution(y):
+    shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
+    moment = integrate.cumtrapz(shear, yvalues, initial=0)
+    momentdistributionlst = -1 * np.flip(moment)
+    return momentdistributionlst
 
-def momentdistribution(z):
-    estimatemoment , _ = sp.integrate.quad(sheardistribution, z, halfspan, limit=1000)
-    return -1*estimatemoment + moment() if z == 0 else -1*(estimatemoment)
-
-momentdistributionlst = np.array([])
-for element in yvalues:
-    momentdistributionlst = np.append(momentdistributionlst, momentdistribution(element))
-
-# Plot shear and moment distributions
 plt.subplot(1,2,1)
-plt.plot(yvalues, sheardistributionlst, 'b')
+plt.plot(yvalues, sheardistribution(yvalues), "b")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Shear [N]')
 plt.title('Shear distribution')
 
 plt.subplot(1,2,2)
-plt.plot(yvalues, momentdistributionlst, 'g')
+plt.plot(yvalues,momentdistribution(yvalues), "g")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Moment [Nm]')
 plt.title('Moment distribution')
-
-plt.subplots_adjust(wspace=0.5)
 plt.show()
 
-sp.integrate.simps(sheardistributionlst, yvalues)
+
