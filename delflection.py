@@ -1,35 +1,32 @@
-import numpy as np
 from csv import reader
 import scipy as sp
 from scipy import interpolate
 from matplotlib import pyplot as plt
 from scipy import integrate
-
-
-
-
+import numpy as np
 
 # Read the CSV file
 data = []
-with open('A07csv3.csv', 'r') as file:
+with open('A07csv2.csv', 'r') as file:
     csv_reader = reader(file)
     for row in csv_reader:
         data.append(row)
 
 # Defined constants
 rho = 1.225
-v = 242
+v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
 centroid = 14.4486
+n = 2.5
 
 # Create arrays for the values in the CSV file
 ylst = np.array([])
-chordlst = np.array([]) 
-Ailst = np.array([]) 
-Cllst = np.array([]) 
-ICdlst = np.array([]) 
-Cmc4lst = np.array([]) 
+chordlst = np.array([])
+Ailst = np.array([])
+Cllst = np.array([])
+ICdlst = np.array([])
+Cmc4lst = np.array([])
 
 # Append correct values from csv_reader to arrays
 for row in data[51:81]:      # Range can be adjusted here!
@@ -47,37 +44,37 @@ def yCl(y, Cl):
 def ychord(y, chord):
     return sp.interpolate.interp1d(y,chord,kind='cubic',fill_value="extrapolate")
 
+def yICd(y, ICd):
+    return sp.interpolate.interp1d(y,ICd,kind='cubic',fill_value="extrapolate")
+
+def yCmc4(y, cmc4):
+    return sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
+
 # Define set of values for y
 yvalues = np.arange(0, halfspan, 0.5)
 
 yCl_result = yCl(ylst, Cllst)
 ychord_result = ychord(ylst, chordlst)
+yICd_result = yICd(ylst, ICdlst)
+yCmc4_result = yCmc4(ylst, Cmc4lst)
 
 # Functions to calculate distributed load an point load
 def Ldistribution(x):
-    return yCl_result(x) * q * ychord_result(x)
+    return yCl_result(x) * q * ychord_result(x) * n
+liftdistributionlst = np.array([])
+for element in yvalues:
+    liftdistributionlst = np.append(liftdistributionlst, Ldistribution(element))
 
-def pointload():
-    totallift, _ = sp.integrate.quad(Ldistribution, 0, halfspan, limit=1000)
-    return totallift
-
-def moment():
-    return pointload() * centroid
-
-# Functions to define shear and moment distributions
 def sheardistribution(y):
-    estimateshear , _ = sp.integrate.quad(Ldistribution, y, halfspan, limit=1000)
-    return estimateshear - pointload() if y == 0 else estimateshear
+    shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
+    sheardistributionlst = np.flip(shear)
+    return sheardistributionlst
 
-def momentdistribution(z):
-    estimatemoment , _ = sp.integrate.quad(sheardistribution, z, halfspan, limit=1000)
-    return -1*estimatemoment + moment() if z == 0 else -1*(estimatemoment)
-
-
-
-
-
-
+def momentdistribution(y):
+    shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
+    moment = integrate.cumtrapz(shear, yvalues, initial=0)
+    momentdistributionlst = -1 * np.flip(moment)
+    return momentdistributionlst
 
 def calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y):
     # Constants
@@ -120,7 +117,6 @@ def calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x)
 
-
 # Input values
 t_1 = float(input('Enter the spar thickness: '))
 w_u1 = float(input('Enter the thickness of upper skin: '))
@@ -134,15 +130,23 @@ y = float(input('Enter the spanwise position: '))
 #print("Moment of Inertia:", moment_of_inertia)
 
 def load_integrand(y):
-    return (momentdistribution(y) * -1) / (calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1,y) * 69*10**9)
+    momentdistributionlst = momentdistribution(yvalues)
+    integrandlst = np.array([])
+    n = 0
+    for element in y:
+        momentvalues = momentdistributionlst[n]
+        n = n+1
+        integrandlst = np.append(integrandlst, (momentvalues *- 1)/(calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1,element) * 69*10**9))
+    return integrandlst
 
 def deflection(y):
     def load(y):
-        return integrate.quad(load_integrand, 0, y)[0]
-
-    deflection_result = integrate.quad(load, 0, y)[0]
+        return integrate.cumtrapz(load_integrand(y), y, initial = 0)
+    deflection_result = integrate.cumtrapz(load(y), y, initial = 0)
     return deflection_result
 
-deflectionlst = np.vectorize(deflection)
-
-print(deflectionlst(yvalues))
+plt.plot(yvalues, deflection(yvalues), "b")
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Deflection [m]')
+plt.title('Deflection Graph')
+plt.show()
