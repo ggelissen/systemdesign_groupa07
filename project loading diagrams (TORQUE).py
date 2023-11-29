@@ -188,17 +188,21 @@ for i in range(len(ylst)):
         torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,ylst[i],G))
 
    #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
-def find_closest_value_index(input_list, target_value):
-    closest_index = min(range(len(input_list)), key=lambda i: abs(input_list[i] - target_value))
-    return closest_index
-integrands_1 = integrands[:find_closest_value_index(ylst, (b/2)*0.35)]
-integrands_2 = integrands[find_closest_value_index(ylst, (b/2)*0.35):] 
-x_limit_1=ylst[:len(integrands_1)]
-x_limit_2=ylst[len(integrands_1):]
+#def find_closest_value_index(input_list, target_value):
+#    closest_index = min(range(len(input_list)), key=lambda i: abs(input_list[i] - target_value))
+#    return closest_index
+#integrands_1 = integrands[:find_closest_value_index(ylst, (b/2)*0.35)]
+#integrands_2 = integrands[find_closest_value_index(ylst, (b/2)*0.35):] 
+#x_limit_1=ylst[:len(integrands_1)]
+#x_limit_2=ylst[len(integrands_1):]
 
-integral_values = sp.integrate.cumtrapz(integrands_1, x=x_limit_1, initial=0)
-last_value = integral_values[-1]
-integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
+#integral_values = sp.integrate.cumtrapz(integrands_1, x=x_limit_1, initial=0)
+#last_value = integral_values[-1]
+#integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
+#integral_values = integral_values*180/math.pi
+
+integral_values = sp.integrate.cumtrapz(integrands, x=ylst, initial=0)
+#integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
 integral_values = integral_values*180/math.pi
 
 plt.plot(ylst,torsional_stiffness)
