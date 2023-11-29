@@ -4,6 +4,8 @@ Torque diagrams due to engine weight & thrust
 """
 
 import numpy as np 
+import scipy as sp
+import math
 import matplotlib.pyplot as plt
 from LiftWeight_ShearBendingDiagrams import Cmc4lst
 from LiftWeight_ShearBendingDiagrams import ylst 
@@ -155,10 +157,11 @@ t_11=float(input('Enter t11[m]: '))
 t_2=float(input('Enter t2[m]: '))
 t_3=float(input('Enter t3[m]: '))
 t_4=float(input('Enter t4[m]: '))
+spac=float(input('Enter spacing between front and mid spar[x/c]: '))
 L_4=float(input('Enter L4[m]: '))
-G=26000 #Pa
+G=26000000000 #Pa
 
-def chord(y):
+def chord_calc(y):
    c_root = 13.4
    c_tip = 3.8
    half_span = 33.45
@@ -167,36 +170,43 @@ def chord(y):
 
 torsional_stiffness=[]
 integrands=[]
-for i in range(len(y_vals)):
-    h_length = float(0.5*chord(y_vals[i]))
-    l_up=float(0.5004620365222*chord(y_vals[i]))
-    l_low=float(0.5003958533001*chord(y_vals[i]))
-    L_1 = float(0.1082 * chord(y_vals[i]))
-    L_2= float(0.0668 * chord(y_vals[i]))
-    L_3 = float(spac * chord(y_vals[i]))
-    T=float(torque[i])
-    if y_vals[i] <= L_4:
+for i in range(len(ylst)):
+    h_length = float(0.5*chord_calc(y_vals[i]))
+    l_up=float(0.5004620365222*chord_calc(y_vals[i]))
+    l_low=float(0.5003958533001*chord_calc(y_vals[i]))
+    L_1 = float(0.1082 * chord_calc(y_vals[i]))
+    L_2= float(0.0668 * chord_calc(y_vals[i]))
+    L_3 = float(spac * chord_calc(y_vals[i]))
+    T=float(total[i])
+    if ylst[i] <= L_4:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))
-    elif y_vals[i] > L_4 and:
+    elif ylst[i] > L_4:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
-    if y_vals[i] <= L_4 and y_vals[i] != 0:
-        torsional_stiffness.append(torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,y_vals[i],G))
-    elif y_vals[i] > L_4:
-        torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,y_vals[i],G))
+    if ylst[i] <= L_4 and ylst[i] != 0:
+        torsional_stiffness.append(torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,ylst[i],G))
+    elif ylst[i] > L_4 and ylst[i] != 0:
+        torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,ylst[i],G))
 
    #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
+def find_closest_value_index(input_list, target_value):
+    closest_index = min(range(len(input_list)), key=lambda i: abs(input_list[i] - target_value))
+    return closest_index
+integrands_1 = integrands[:find_closest_value_index(ylst, (b/2)*0.35)]
+integrands_2 = integrands[find_closest_value_index(ylst, (b/2)*0.35):] 
+x_limit_1=ylst[:len(integrands_1)]
+x_limit_2=ylst[len(integrands_1):]
 
-integral_values = sp.integrate.cumtrapz(integrands, x=y_vals, initial=0)
+integral_values = sp.integrate.cumtrapz(integrands_1, x=x_limit_1, initial=0)
+last_value=integral_values[-1]
+integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
 integral_values = integral_values*180/math.pi
 
-plt.plot(y_vals[1:],torsional_stiffness)
+plt.plot(ylst,torsional_stiffness)
 plt.title("Torsional Stiffness diagram")
 plt.ylabel("Torsional Stiffness")
 plt.xlabel("Half Span[m]")
 plt.show()
 
-plt.plot(y_vals, integral_values)
-plt.title("Twist angle diageram")
+plt.plot(ylst, integral_values)
+plt.title("Twist angle diagram")
 plt.ylabel("twist angle[deg]")
-plt.xlabel("Half Span[m]")
-plt.show()
