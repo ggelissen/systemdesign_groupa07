@@ -197,7 +197,7 @@ x_limit_1=ylst[:len(integrands_1)]
 x_limit_2=ylst[len(integrands_1):]
 
 integral_values = sp.integrate.cumtrapz(integrands_1, x=x_limit_1, initial=0)
-last_value=integral_values[-1]
+last_value = integral_values[-1]
 integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
 integral_values = integral_values*180/math.pi
 
