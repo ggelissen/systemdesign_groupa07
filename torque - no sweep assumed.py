@@ -51,8 +51,6 @@ for element in ylst:
         torque.append(0)
         
 moment = [] ## same sign as Tw
-def chord(y):
-    return cr - cr*(1-taper)*(y/(b/2))
   
 chord_check = []  
 for i in range(len(ylst)):
