@@ -54,7 +54,7 @@ moment = [] ## same sign as Tw
   
 chord_check = []  
 for i in range(len(ylst)):
-    moment.append(Cmc4lst[i]*0.5*rho*(chord(ylst[i])**2)*V**2) ## M = (1/2)Cm*rho*c^2*V^2
+    moment.append(Cmc4lst[i]*0.5*rho*chord(ylst[i])*S*V**2) ## M = (1/2)Cm*rho*c*S*V^2
     chord_check.append(chord(ylst[i]))
 
 total = np.array(moment) + np.array(torque) ## questioning if the moment eq is correct
