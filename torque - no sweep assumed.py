@@ -41,7 +41,7 @@ def closest(lst, val): #finding entry in list closest to val
 
 """ Torque values """
 Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
-Tt = T*h*np.sin((90-sweep_LE)*d2r)
+Tt = T*h*np.cos(sweep_LE*d2r)
 
 torque = []
 for element in ylst:
