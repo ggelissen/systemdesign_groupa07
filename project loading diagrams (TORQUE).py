@@ -152,11 +152,11 @@ def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option,T):
 ##   else:
 ##      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T),y-0.5,y)
 ##      return float(theta[0])
-t_1=float(input('Enter t1[m]: '))
-t_11=float(input('Enter t11[m]: '))
-t_2=float(input('Enter t2[m]: '))
-t_3=float(input('Enter t3[m]: '))
-t_4=float(input('Enter t4[m]: '))
+t_01=float(input('Enter t1[m]: '))
+t_011=float(input('Enter t11[m]: '))
+t_02=float(input('Enter t2[m]: '))
+t_03=float(input('Enter t3[m]: '))
+t_04=float(input('Enter t4[m]: '))
 spac=float(input('Enter spacing between front and mid spar[x/c]: '))
 L_4=float(input('Enter L4[m]: '))
 G=26000000000 #Pa
@@ -177,6 +177,11 @@ for i in range(len(ylst)):
     L_1 = float(0.1082 * chord_calc(y_vals[i]))
     L_2= float(0.0668 * chord_calc(y_vals[i]))
     L_3 = float(spac * chord_calc(y_vals[i]))
+    t_1 = t_01 * chord_calc(y_vals[i])
+    t_11 = t_011 * chord_calc(y_vals[i])
+    t_2 = t_02 * chord_calc(y_vals[i])
+    t_3 = t_03 * chord_calc(y_vals[i])
+    t_4 = t_04 * chord_calc(y_vals[i])
     T=float(total[i])
     if ylst[i] <= L_4:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))

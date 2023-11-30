@@ -7,7 +7,7 @@ import numpy as np
 
 # Read the CSV file
 data = []
-with open('A07csv2.csv', 'r') as file:
+with open('A07csv10.csv', 'r') as file:
     csv_reader = reader(file)
     for row in csv_reader:
         data.append(row)
