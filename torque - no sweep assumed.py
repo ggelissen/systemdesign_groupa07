@@ -15,15 +15,15 @@ from LiftWeight_ShearBendingDiagrams import ylst
 b = 66.9 #m
 Weng = 6630 #kg
 grav  = 9.81 #m/s^2 
-T = 200000 #N
-h = 2.127 #heigh of eng to center wing
+T = 0 #N
+h = 2.127 #height of eng to center wing
 #c035 = 10.0232 #m
-engcenter = 1.43 #wrt leading edge
+engcenter = 1.43 #ahead of the leading edge 
 taper = 0.28
 d2r = np.pi/180
 
 rho = 1.225 #kg/m^3
-V = 242 #m/s
+V = 258 #m/s
 S = 574.3 #m^2
 
 sweep_LE = 37.12 #deg
@@ -40,7 +40,7 @@ def closest(lst, val): #finding entry in list closest to val
 
 
 """ Torque values """
-Tw = Weng*grav*((chord(0.35*b/2)/2)-engcenter)
+Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
 Tt = T*h*np.sin((90-sweep_LE)*d2r)
 
 torque = []
