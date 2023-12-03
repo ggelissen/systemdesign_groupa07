@@ -222,6 +222,20 @@ n_str1 = int(input('Enter the number of stringers: '))
 #moment_of_inertia = calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y)
 #print("Moment of Inertia:", moment_of_inertia)
 
+ylst = np.zeros(70)
+moi = np.zeros(70)
+for i in range (0,70):
+    ylst[i] = i
+    moi[i] = (calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,i))
+
+plt.plot(ylst, moi)
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Moment of Inertia [$m^4$]')
+plt.title('Variation in Moment of Inertia')
+plt.show()
+
+
+
 def load_integrand(y):
     momentdistributionlst = momentdistribution(yvalues)
     integrandlst = np.array([])
