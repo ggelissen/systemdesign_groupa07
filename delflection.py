@@ -158,9 +158,9 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     r_spar = 0.0668 * c
 
     # Dimension multipliers
-    t = t_1 * c
-    w_u = w_u1 * c
-    w_d = w_d1 * c
+    t = t_1 
+    w_u = w_u1 
+    w_d = w_d1 
 
     # Multiple spars
     l_spar1 = np.zeros(n_spar - 1)
