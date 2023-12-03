@@ -23,7 +23,7 @@ taper = 0.28
 d2r = np.pi/180
 
 rho = 1.225 #kg/m^3
-V = 258.9704 #m/s
+V = 242.958 #m/s
 S = 574.3 #m^2
 
 sweep_LE = 37.12 #deg
@@ -216,7 +216,7 @@ plt.xlabel("Half Span[m]")
 plt.show()
 
 plt.plot(ylst, integral_values)
-plt.title("Twist angle diagram")
-plt.ylabel("twist angle[deg]")
-plt.xlabel("Half Span[m]")
+plt.title("Twist Angle Graph")
+plt.ylabel("Twist angle [deg]")
+plt.xlabel("Spanwise location [m]")
 plt.show()

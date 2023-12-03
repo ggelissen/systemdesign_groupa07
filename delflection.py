@@ -6,11 +6,11 @@ from scipy import integrate
 import numpy as np
 
 rho = 1.225
-v = 258.9704
+v = 242.958
 q = 0.5*rho*(v**2)
 halfspan = 33.5
 centroid = 14.4486
-n = 2.5
+n = -1
 b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
@@ -238,6 +238,7 @@ def deflection(y):
     deflection_result = integrate.cumtrapz(load(y), y, initial = 0)
     return deflection_result
 
+'''
 plt.subplot(1,3,1)
 plt.plot(yvalues, sheardistribution(yvalues), "b")
 plt.xlabel('Spanwise location [m]')
@@ -249,12 +250,13 @@ plt.plot(yvalues,momentdistribution(yvalues), "g")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Moment [Nm]')
 plt.title('Moment distribution')
+'''
 
-plt.subplot(1,3,3)
+# plt.subplot(1,3,3)
 plt.plot(yvalues, deflection(yvalues), "r")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Deflection [m]')
 plt.title('Deflection Graph')
 
-plt.subplots_adjust(wspace=0.6)
+# plt.subplots_adjust(wspace=0.6)
 plt.show()
