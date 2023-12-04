@@ -23,7 +23,7 @@ taper = 0.28
 d2r = np.pi/180
 
 rho = 1.225 #kg/m^3
-V = 258.97 #m/s
+V = 242.958 #m/s
 S = 574.3 #m^2
 
 sweep_LE = 37.12 #deg
@@ -62,7 +62,7 @@ total = np.array(moment) + np.array(torque) ## questioning if the moment eq is c
 plt.plot(ylst, total)
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Torque [Nm]')
-plt.title('Torque distribution')
+plt.title('Torque Distribution')
 plt.show()
 
 #------------------------------------------------------------------------------------------------------------------

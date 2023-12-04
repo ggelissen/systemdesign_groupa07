@@ -131,13 +131,13 @@ plt.subplot(221)
 plt.plot(y_vals[1:], load[1:])
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Weight [N]')
-plt.title("total load")
+plt.title("Total Load")
 
 plt.subplot(222)
 plt.plot(y_vals[1:], dryload[1:])
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Weight [N]')
-plt.title("Structural weight")
+plt.title("Structural Weight")
 
 
 plt.subplot(223)
@@ -145,15 +145,15 @@ plt.plot(y_vals, fuelload)
 plt.axis([0, 33, 0, 40000]) 
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Weight [N]')
-plt.title("Fuel weight")
+plt.title("Fuel Weight")
 
 plt.subplot(224)
 plt.plot(y_vals, engload)
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Weight [N]')
-plt.title("Engine weight")
+plt.title("Engine Weight")
 
-plt.subplots_adjust(wspace=0.6, hspace=0.7)
+plt.subplots_adjust(wspace=0.7, hspace=0.8)
 
 ## shear and moment plots 
 """plt.subplot(121)
