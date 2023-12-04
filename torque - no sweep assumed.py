@@ -23,13 +23,13 @@ taper = 0.28
 d2r = np.pi/180
 
 rho = 1.225 #kg/m^3
-V = 242.958 #m/s
+V = 258.97 #m/s
 S = 574.3 #m^2
 
 sweep_LE = 37.12 #deg
 cr = 13.4 #m 
 
-y_vals = np.arange(0, b/2, 0.5)
+y_vals = np.arange(0, b/2, 0.1)
 def chord(y):
     return cr - cr*(1-taper)*(y/(b/2))
 
@@ -210,9 +210,9 @@ integral_values = sp.integrate.cumtrapz(integrands, x=ylst, initial=0)
 integral_values = integral_values*180/math.pi
 
 plt.plot(ylst,torsional_stiffness)
-plt.title("Torsional Stiffness diagram")
-plt.ylabel("Torsional Stiffness")
-plt.xlabel("Half Span[m]")
+plt.title("Torsional Stiffness")
+plt.ylabel("Torsional Stiffness [Nm/rad]")
+plt.xlabel("Spanwise location [m]")
 plt.show()
 
 plt.plot(ylst, integral_values)

@@ -6,11 +6,11 @@ from scipy import integrate
 import numpy as np
 
 rho = 1.225
-v = 242.958
+v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
 centroid = 14.4486
-n = -1
+n = 2.5
 b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
@@ -119,6 +119,10 @@ def cts_loaddistr(y):
         g = 0
     return f + g  ##f is structural weight, g is fuel weight
 
+# Angle of Attack
+alpha_sin = (CLD-CL0)/(CL10-CL0) * np.sin(10*np.pi/180)
+alpha = np.arcsin(alpha_sin)
+
 # Functions to calculate distributed load an point load
 def Ldistribution0(x):
     return yCl_result0(x) * q * ychord_result0(x)
@@ -129,7 +133,7 @@ def Ldistribution10(x):
 liftdistributionlst10 = np.array([])
 
 def LdistributionD(x):
-    return Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))
+    return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
     liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n) - cts_loaddistr(element))
