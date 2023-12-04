@@ -60,6 +60,9 @@ for i in range(len(ylst)):
 total = np.array(moment) + np.array(torque) ## questioning if the moment eq is correct
 
 plt.plot(ylst, total)
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Weight [Nm]')
+plt.title("Torque distribution")
 plt.show()
 
 #------------------------------------------------------------------------------------------------------------------
