@@ -62,13 +62,17 @@ for i in range(len(ylst)):
 total = np.array(moment) + np.array(torque) ## questioning if the moment eq is correct
 
 plt.plot(ylst, total)
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Weight [Nm]')
+plt.title("Torque distribution")
 plt.show()
 
 #------------------------------------------------------------------------------------------------------------------
 """
 twist diagram
 """
-#upper
+#upper 
+"""
 alpha = math.acos(0.5/0.5004620365222)
 #lower
 beta = math.acos(0.5/0.5003958533001)
@@ -220,4 +224,4 @@ plt.plot(ylst, integral_values)
 plt.title("Twist angle diagram")
 plt.ylabel("twist angle[deg]")
 plt.xlabel("Half Span[m]")
-plt.show()
+plt.show() """
