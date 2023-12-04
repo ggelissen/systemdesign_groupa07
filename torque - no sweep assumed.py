@@ -62,7 +62,7 @@ total = np.array(moment) + np.array(torque) ## questioning if the moment eq is c
 plt.plot(ylst, total)
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Torque [Nm]')
-plt.title("Torque distribution")
+plt.title('Torque distribution')
 plt.show()
 
 #------------------------------------------------------------------------------------------------------------------
