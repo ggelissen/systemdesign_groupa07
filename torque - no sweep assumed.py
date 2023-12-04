@@ -69,7 +69,7 @@ plt.show()
 """
 twist diagram
 """
-
+"""" 
 #upper
 alpha = math.acos(0.5/0.5004620365222)
 #lower
@@ -223,3 +223,4 @@ plt.title("Twist Angle Graph")
 plt.ylabel("Twist angle [deg]")
 plt.xlabel("Spanwise location [m]")
 plt.show()
+"""
