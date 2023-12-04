@@ -81,7 +81,7 @@ def cts_loaddistr(y):
     return f + g ##f is structural weight, g is fuel weight
 
 """ shear and moment calculations"""
-cts_sheardistr = [] ## integrating the actual functions, later adding the shear due to point load (eng)
+"""cts_sheardistr = [] ## integrating the actual functions, later adding the shear due to point load (eng)
 def sheardistribution(y):
     shear, error = sp.integrate.quad(cts_loaddistr, y, b/2)
     return shear 
@@ -124,12 +124,12 @@ for element in y_vals:
         engmoment.append(0)
 
 
-moment = np.array(cts_momentdistr) + np.array(engmoment) ##ALL MOMENTS CAUSED BY WEIGHT
+moment = np.array(cts_momentdistr) + np.array(engmoment) """ ##ALL MOMENTS CAUSED BY WEIGHT
 
 """ plots """
 
 ## loading plots (force, weight)
-"""plt.subplot(221)
+plt.subplot(221)
 plt.plot(y_vals[1:], load[1:])
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Weight [N]')
@@ -155,7 +155,8 @@ plt.xlabel('Spanwise location [m]')
 plt.ylabel('Weight [N]')
 plt.title("Engine weight")
 
-plt.subplots_adjust(wspace=0.6, hspace=0.7)"""
+plt.subplots_adjust(wspace=0.6, hspace=0.7)
+"""
 
 ## shear and moment plots 
 plt.subplot(121)
@@ -168,9 +169,9 @@ plt.subplot(122)
 plt.plot(y_vals, moment)
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Moment [Nm]')
-plt.title("moment*EI")
+plt.title("moment*EI") 
 
-plt.subplots_adjust(wspace=0.45)
+plt.subplots_adjust(wspace=0.45)"""
 
 
 

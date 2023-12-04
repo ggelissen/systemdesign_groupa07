@@ -1,6 +1,5 @@
 from csv import reader
 import scipy as sp
-from scipy import interpolate
 from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
@@ -9,7 +8,6 @@ rho = 1.225
 v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-centroid = 14.4486
 n = 2.5
 b = 67  # m
 Ww = 38229.5 / 2  # kg
@@ -80,7 +78,6 @@ def yCmc4(y, cmc4):
     return sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
 
 # Define set of values for y
-
 yvalues = np.arange(0, halfspan, 0.5)
 yCl_result0 = yCl(ylst0, Cllst0)
 ychord_result0 = ychord(ylst0, chordlst0)
@@ -92,14 +89,14 @@ ychord_result10 = ychord(ylst10, chordlst10)
 yICd_result10 = yICd(ylst10, ICdlst10)
 yCmc4_result10 = yCmc4(ylst10, Cmc4lst10)
 
-def closest(lst, val):  # finding entry in list closest to val
+# finding entry in list closest to val
+def closest(lst, val):  
     lst = np.asarray(lst)
     idx = (np.abs(lst - val)).argmin()
 
     return lst[idx]
 
-## functions to define all loading distribution (ie decreasing triangular shape for dry, const for fuel)
-
+# functions to define all loading distribution (ie decreasing triangular shape for dry, const for fuel)
 engload = []
 for element in yvalues:
     if element != closest(yvalues, (b / 2) * 0.35):
@@ -117,7 +114,7 @@ def cts_loaddistr(y):
         g = Wf * grav / (b / 4)
     if y > b / 4:
         g = 0
-    return f + g  ##f is structural weight, g is fuel weight
+    return f + g  #f is structural weight, g is fuel weight
 
 # Angle of Attack
 alpha_sin = (CLD-CL0)/(CL10-CL0) * np.sin(10*np.pi/180)
