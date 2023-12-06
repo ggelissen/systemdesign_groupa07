@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from csv import reader
 import scipy as sp
 from matplotlib import pyplot as plt
@@ -8,17 +9,23 @@ rho = 1.225
 v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-n = 2.5
 b = 67  # m
+cr = 13.4
+taper = 0.28
+t_c = 0.113
+
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
 Weng = 6033  # kg
 grav = 9.81  # m/s^2
+n = 2.5
 
 CL0 = 0.04647
 CL10 = 0.97586
 CLD = 0.5785
 
+
+""" shear distr. """
 # Create arrays for the values in the CSV file
 ylst0 = np.array([])
 chordlst0 = np.array([])
@@ -140,21 +147,48 @@ def sheardistribution(y):
     sheardistributionlst = np.flip(shear)
     return sheardistributionlst
 
-print(len(yvalues))
-
 shearlst = sheardistribution(yvalues)
 
+""" web definition """
 spanlocation = input("Enter the spanwise location: ")
 hf = float(input("Enter the height of the front spar: "))
 tf = float(input("Enter the thickness of the front spar: "))
 hr = float(input("Enter the height of the rear spar: "))
 tr = float(input("Enter the thickness of the rear spar: "))
+hm = float(input("Enter the thickness of the mid spar: "))
+tm = float(input("Enter the thickness of the mid spar: "))
+nr = int(input("Enter the amount of ribs: "))
 
-avgsheardist = shearlst/((hf * tf + hr * tr)*n)
+
+def chord(y):
+    return cr - cr*(1-taper)*(y/(b/2))
 
 
+avgsheardist = shearlst/((hf * tf + hr * tr + hm * tm))
+
+a = (b/2)/nr ## assuming equal spacing
+kslst = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
+a_blst = [1, 1.2, 1.5, 1.7, 2, 2.5, 3, 3.5]
+
+#def ks(ratio, ks_coeff):
+ #   return sp.interpolate.interp1d(ratio, ks_coeff, kind = 'cubic', fill_value = 'extrapolate')
+
+interpolation_function = sp.interpolate.interp1d(a_blst, kslst, kind = 'cubic', fill_value = 'extrapolate')
+a_b_interp = np.linspace(1, 3.5, 100)
+ks_interp = interpolation_function(a_b_interp)
+
+print(ks_interp)
+
+avg_b = []
+distr_ks = []
+for nth in range(nr):
+    b1 = t_c*chord(nth*a) ## left handside, closest to root, evaluated at the nth bay
+    b2 = t_c*chord((nth + 1)*a)
+    avg_b.append(0.5 * (b1 + b2))
+    
 
 
+"""
 plt.subplot(1,2,1)
 plt.plot(yvalues, sheardistribution(yvalues), "b")
 plt.xlabel('Spanwise location [m]')
@@ -167,5 +201,4 @@ plt.xlabel('Spanwise location [m]')
 plt.ylabel('Average Shear')
 plt.title('Average Shear Distribution')
 plt.show()
-
-
+"""
