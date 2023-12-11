@@ -1,75 +1,88 @@
-# -*- coding: utf-8 -*-
-"""
-Torque diagrams due to engine weight & thrust
-"""
-
 import numpy as np 
 import scipy as sp
 import math
 import matplotlib.pyplot as plt
-from LiftWeight_ShearBendingDiagrams import Cmc4lst
 from LiftWeight_ShearBendingDiagrams import ylst 
 
-## assumed coordinate system: x forward (pointing to nose), y to the right (pointing to wingtip), z downwards
-
-b = 66.9 #m
-Weng = 6630 #kg
-grav  = 9.81 #m/s^2 
-T = 0 #N
-h = 2.127 #height of eng to center wing
-#c035 = 10.0232 #m
-engcenter = 1.43 #ahead of the leading edge 
+b = 67
+Weng = 6630 
+grav  = 9.81 
+T = 0 
+h = 2.127 
+engcenter = 1.43 
 taper = 0.28
 d2r = np.pi/180
+rho = 1.225 
+V = 258.9704 
+S = 574.3 
+sweep_LE = 37.12 
+cr = 13.4 
 
-rho = 1.225 #kg/m^3
-V = 242.958 #m/s
-S = 574.3 #m^2
+def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
+    # Constants
+    c_root = 13.4
+    c_tip = 3.8
+    half_span = 33.45
+    m = (c_tip - c_root) / half_span
 
-sweep_LE = 37.12 #deg
-cr = 13.4 #m 
+    # Wing geometry
+    c = c_root + (m * y)
+    f_spar = 0.1082 * c
+    r_spar = 0.0668 * c
 
-y_vals = np.arange(0, b/2, 0.1)
-def chord(y):
-    return cr - cr*(1-taper)*(y/(b/2))
+    # Dimension multipliers
+    t = t_1 
+    w_u = w_u1 
+    w_d = w_d1 
 
-def closest(lst, val): #finding entry in list closest to val
-    lst = np.asarray(lst)
-    idx = (np.abs(lst-val)).argmin()
-    return lst[idx]
+    # Multiple spars
+    l_spar1 = np.zeros(n_spar - 1)
+    x_spar1 = np.zeros(n_spar - 1)
+    z_spar1 = np.zeros(n_spar - 1)
+    t_spar = np.zeros(n_spar - 1)
+    m_up =  (0.045 - 0.0665)/ 0.5
+    m_down = (0.0417 - 0.0218)/ 0.5
+    l_moi = np.zeros(n_spar - 1)
+    h_moi = np.zeros(n_spar - 1)
+    if n_spar > 2:
+        for i in range(n_spar - 2):
+            l_spar1[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
+            x_spar1[i] = c * i * 0.5 / (n_spar - 1)     
+            z_spar1[i] = (c * (i * m_down * 0.5 /(n_spar - 1))) + (l_spar1[i]) * 0.5
+            t_spar[i] = t
+            l_moi[i] = t
+            h_moi[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
 
+    # Centroids and areas
+    x_centroid = np.array([0, 0.5 * c, 0.5 * c, 0.5 * c * 0.5])
+    x_centroids = np.concatenate((x_centroid, x_spar1))  # Taking into account spars
+    z_centroid = np.array([0.5 * f_spar, (0.0417 * c) + (0.5 * 0.0668 * c), f_spar - ((0.0665 - 0.0450) * c * 0.5), (0.0417 - 0.0218) * c * 0.5])
+    z_centroids = np.concatenate((z_centroid, z_spar1))
+    l_part = np.array([f_spar, r_spar, np.sqrt((0.5 * c)**2 + ((0.0665 - 0.0450) * c)**2), np.sqrt((0.5 * c)**2 + ((0.0417 - 0.0218) * c)**2)])
+    l_parts = np.concatenate((l_part, l_spar1))
+    t_part = np.array([t, t, w_u, w_d])
+    t_parts = np.concatenate((t_part, t_spar))
+    l_x1 = np.array([t, t, np.sqrt((0.5 * c)**2 + ((0.0665 - 0.0450) * c)**2),np.sqrt((0.5 * c)**2 + ((0.0417 - 0.0218) * c)**2) ])
+    l_x = np.concatenate((l_x1, l_moi))
+    h_x1 = np.array([f_spar, r_spar, w_u, w_d])
+    h_x = np.concatenate((h_x1, h_moi))
 
-""" Torque values """
-Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
-Tt = T*h*np.cos(sweep_LE*d2r)
+    # Moment of inertia calculation
+    I_x = np.zeros(n_spar + 2)
+    centroid_x = np.sum(x_centroids * (l_parts * t_parts)) / np.sum(l_parts * t_parts)
+    centroid_z = np.sum(z_centroids * (l_parts * t_parts)) / np.sum(l_parts * t_parts)
+    for i in range(n_spar + 2):
+        I_x[i] = (l_x[i] * h_x[i]**3 / 12) + (l_parts[i] * t_parts[i]) * ((z_centroids[i] - centroid_z)**2)
 
-torque = []
-for element in ylst:
-    if element <= closest(ylst, (b/2)*0.35) and element > 0: #weight causes negative torque, thrust pos. torque
-        torque.append(Tt-Tw)
-    if element > closest(ylst, (b/2)*0.35):
-        torque.append(0)
-        
-moment = [] ## same sign as Tw
-  
-chord_check = []  
-for i in range(len(ylst)):
-    moment.append(Cmc4lst[i]*0.5*rho*chord(ylst[i])*S*V**2) ## M = (1/2)Cm*rho*c*S*V^2
-    chord_check.append(chord(ylst[i]))
+    # Stringer contributions
+    z_str1 = f_spar - ((0.0665 - 0.0450) * c * 0.5)
+    z_str2 = (0.0417 - 0.0218) * c * 0.5
+    for i in range(n_str1):
+        I_x = np.append(I_x, A1 * ((z_str1 - centroid_z)**2))
+        I_x = np.append(I_x, A1 * ((z_str2 - centroid_z)**2))
 
-total = np.array(moment) + np.array(torque) ## questioning if the moment eq is correct
+    return np.sum(I_x)
 
-plt.plot(ylst, total)
-plt.xlabel('Spanwise location [m]')
-plt.ylabel('Torque [Nm]')
-plt.title('Torque Distribution')
-plt.show()
-
-#------------------------------------------------------------------------------------------------------------------
-"""
-twist diagram
-"""
-"""" 
 #upper
 alpha = math.acos(0.5/0.5004620365222)
 #lower
@@ -145,22 +158,7 @@ def torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,option,T):
       2: T_2,
    }
    return integrand.get(option, None)
-##def twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,y,L_4,T):
-##   #L_4 length of the double cell wing box
-##   if y > L_4:
-##      angle_diff = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T),y-0.5,y)
-##      theta = angle_diff[0] + sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T),L_4-0.5,L_4)
-##      return float(theta)
-##   else:
-##      theta = sp.integrate.quad(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T),y-0.5,y)
-##      return float(theta[0])
-t_01=float(input('Enter t1[m]: '))
-t_011=float(input('Enter t11[m]: '))
-t_02=float(input('Enter t2[m]: '))
-t_03=float(input('Enter t3[m]: '))
-t_04=float(input('Enter t4[m]: '))
-spac=float(input('Enter spacing between front and mid spar[x/c]: '))
-L_4=float(input('Enter L4[m]: '))
+
 G=26000000000 #Pa
 
 def chord_calc(y):
@@ -173,12 +171,12 @@ def chord_calc(y):
 torsional_stiffness=[]
 integrands=[]
 for i in range(len(ylst)):
-    h_length = float(0.5*chord_calc(y_vals[i]))
-    l_up=float(0.5004620365222*chord_calc(y_vals[i]))
-    l_low=float(0.5003958533001*chord_calc(y_vals[i]))
-    L_1 = float(0.1082 * chord_calc(y_vals[i]))
-    L_2= float(0.0668 * chord_calc(y_vals[i]))
-    L_3 = float(spac * chord_calc(y_vals[i]))
+    h_length = float(0.5*chord_calc(yvalues[i]))
+    l_up=float(0.5004620365222*chord_calc(yvalues[i]))
+    l_low=float(0.5003958533001*chord_calc(yvalues[i]))
+    L_1 = float(0.1082 * chord_calc(yvalues[i]))
+    L_2= float(0.0668 * chord_calc(yvalues[i]))
+    L_3 = float(spac * chord_calc(yvalues[i]))
     t_1 = t_01 
     t_11 = t_011 
     t_2 = t_02 
@@ -194,22 +192,7 @@ for i in range(len(ylst)):
     elif ylst[i] > L_4 and ylst[i] != 0:
         torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,ylst[i],G))
 
-   #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
-#def find_closest_value_index(input_list, target_value):
-#    closest_index = min(range(len(input_list)), key=lambda i: abs(input_list[i] - target_value))
-#    return closest_index
-#integrands_1 = integrands[:find_closest_value_index(ylst, (b/2)*0.35)]
-#integrands_2 = integrands[find_closest_value_index(ylst, (b/2)*0.35):] 
-#x_limit_1=ylst[:len(integrands_1)]
-#x_limit_2=ylst[len(integrands_1):]
-
-#integral_values = sp.integrate.cumtrapz(integrands_1, x=x_limit_1, initial=0)
-#last_value = integral_values[-1]
-#integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
-#integral_values = integral_values*180/math.pi
-
 integral_values = sp.integrate.cumtrapz(integrands, x=ylst, initial=0)
-#integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
 integral_values = integral_values*180/math.pi
 
 plt.plot(ylst,torsional_stiffness)
@@ -223,4 +206,4 @@ plt.title("Twist Angle Graph")
 plt.ylabel("Twist angle [deg]")
 plt.xlabel("Spanwise location [m]")
 plt.show()
-"""
+

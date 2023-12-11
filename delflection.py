@@ -5,15 +5,23 @@ from scipy import integrate
 import numpy as np
 
 rho = 1.225
-v = 258.9704
+v = 242.958
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-n = 2.5
+n = -1
 b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
 Weng = 6033  # kg
 grav = 9.81  # m/s^2
+T = 0
+h = 2.127 
+engcenter = 1.43 
+taper = 0.28
+d2r = np.pi/180
+S = 574.3 #m^2
+sweep_LE = 37.12 #deg
+cr = 13.4 #m 
 
 CL0 = 0.04647
 CL10 = 0.97586
@@ -78,7 +86,7 @@ def yCmc4(y, cmc4):
     return sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
 
 # Define set of values for y
-yvalues = np.arange(0, halfspan, 0.5)
+yvalues = np.arange(0, halfspan, 0.01)
 yCl_result0 = yCl(ylst0, Cllst0)
 ychord_result0 = ychord(ylst0, chordlst0)
 yICd_result0 = yICd(ylst0, ICdlst0)
@@ -93,7 +101,6 @@ yCmc4_result10 = yCmc4(ylst10, Cmc4lst10)
 def closest(lst, val):  
     lst = np.asarray(lst)
     idx = (np.abs(lst - val)).argmin()
-
     return lst[idx]
 
 # functions to define all loading distribution (ie decreasing triangular shape for dry, const for fuel)
@@ -145,6 +152,30 @@ def momentdistribution(y):
     moment = integrate.cumtrapz(shear, yvalues, initial=0)
     momentdistributionlst = -1 * np.flip(moment)
     return momentdistributionlst
+
+
+def chord(y):
+    return cr - cr*(1-taper)*(y/(b/2))
+
+Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
+Tt = T*h*np.cos(sweep_LE*d2r)
+
+torque = []
+for element in yvalues:
+    if element <= closest(yvalues, (b/2)*0.35) and element >= 0:
+        torque.append(Tt-Tw)
+    if element > closest(yvalues, (b/2)*0.35):
+        torque.append(0)
+        
+       
+moment = []
+  
+for i in range(len(yvalues)):
+    moment.append(yCmc4_result10(yvalues[i])*0.5*rho*chord(yvalues[i])*S*v**2) ## M = (1/2)Cm*rho*c*S*V^2
+    
+
+total = np.array(moment) + np.array(torque)
+
 
 def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     # Constants
@@ -228,13 +259,13 @@ moi = np.zeros(70)
 for i in range (0,70):
     ylst[i] = i
     moi[i] = (calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,i))
-
+'''
 plt.plot(ylst, moi)
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Moment of Inertia [$m^4$]')
 plt.title('Variation in Moment of Inertia')
 plt.show()
-
+'''
 
 
 def load_integrand(y):
@@ -253,25 +284,35 @@ def deflection(y):
     deflection_result = integrate.cumtrapz(load(y), y, initial = 0)
     return deflection_result
 
+sheardist = sheardistribution(yvalues)
+sheardist[0] = 0
+momentdist = momentdistribution(yvalues)
+momentdist[0] = 0
 '''
-plt.subplot(1,3,1)
-plt.plot(yvalues, sheardistribution(yvalues), "b")
+#plt.subplot(1,3,1)
+plt.plot(yvalues, sheardist, "b")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Shear [N]')
-plt.title('Shear distribution')
+plt.title('Shear Distribution')
 
-plt.subplot(1,3,2)
-plt.plot(yvalues,momentdistribution(yvalues), "g")
+#plt.subplot(1,3,2)
+plt.plot(yvalues,momentdist, "g")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Moment [Nm]')
-plt.title('Moment distribution')
-'''
+plt.title('Moment Distribution')
 
-# plt.subplot(1,3,3)
+'''
+#plt.subplot(1,3,3)
+plt.plot(yvalues, total)
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Torque [Nm]')
+plt.title('Torque Distribution')
+plt.show()
+'''
 plt.plot(yvalues, deflection(yvalues), "r")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Deflection [m]')
 plt.title('Deflection Graph')
-
-# plt.subplots_adjust(wspace=0.6)
+'''
+plt.subplots_adjust(wspace=0.45)
 plt.show()
