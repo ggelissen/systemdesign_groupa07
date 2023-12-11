@@ -4,11 +4,11 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
-rho = 1.225
+rho = 0.324438
 v = 242.958
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-n = -1
+n = 2.5
 b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
@@ -140,7 +140,11 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n) - cts_loaddistr(element))
+    liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n)) #- cts_loaddistr(element))
+
+print(liftdistributionlst)
+plt.plot(yvalues, liftdistributionlst)
+plt.show()
 
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
@@ -288,31 +292,30 @@ sheardist = sheardistribution(yvalues)
 sheardist[0] = 0
 momentdist = momentdistribution(yvalues)
 momentdist[0] = 0
-'''
-#plt.subplot(1,3,1)
+
+plt.subplot(1,3,1)
 plt.plot(yvalues, sheardist, "b")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Shear [N]')
 plt.title('Shear Distribution')
 
-#plt.subplot(1,3,2)
+plt.subplot(1,3,2)
 plt.plot(yvalues,momentdist, "g")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Moment [Nm]')
 plt.title('Moment Distribution')
 
-'''
-#plt.subplot(1,3,3)
+plt.subplot(1,3,3)
 plt.plot(yvalues, total)
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Torque [Nm]')
 plt.title('Torque Distribution')
 plt.show()
-'''
+
 plt.plot(yvalues, deflection(yvalues), "r")
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Deflection [m]')
 plt.title('Deflection Graph')
-'''
+
 plt.subplots_adjust(wspace=0.45)
 plt.show()

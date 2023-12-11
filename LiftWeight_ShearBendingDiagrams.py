@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
-rho = 1.225
+rho = 0.324438
 v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
