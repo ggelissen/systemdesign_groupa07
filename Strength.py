@@ -16,4 +16,4 @@ yvalues = np.arange(0, 33.5, 0.01)
 
 for i in range(len(yvalues)):
    momentdislst = momentdistribution(yvalues)
-   print(stress_distribution_skin(momentdislst, n_spar, t_1, w_u1, w_d1, A1, n_str1, yvalues[i], chord(yvalues[i])))
+   stress_distribution_skin(momentdislst, n_spar, t_1, w_u1, w_d1, A1, n_str1, yvalues[i], chord(yvalues[i]))
