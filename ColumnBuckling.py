@@ -46,7 +46,7 @@ def momentofinertia_xz_stringer(a, b, t):
     return I1 + I2
 
 
-Ixx = calculate_moment_of_inertia(3, 0.03, 0.03, 0.03, 0.004, 23, 33.5)
+Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.03, 0.03, 0.03, 0.004, 23, 33.5)
 
 
 def columnbuckling_stringer(a, b, t):
@@ -55,10 +55,11 @@ def columnbuckling_stringer(a, b, t):
 
 print(columnbuckling_stringer(length, width, thickness))
 
-def bendingstress_stringer(a, b, t):
-    return (M * ) / Ixx
+def bendingstress_stringer(z):
+    return (M * z) / Ixx
 
-print(bendingstress_stringer(length, width, thickness))
+print(bendingstress_stringer(z_down))
+print(bendingstress_stringer(z_up))
 
 diff = columnbuckling_stringer(length, width, thickness) - bendingstress_stringer(length, width, thickness)
 print(diff)
