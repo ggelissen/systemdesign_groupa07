@@ -7,8 +7,8 @@ import numpy as np
 import scipy as sp
 import math
 import matplotlib.pyplot as plt
-from delflection import Cmc4lst
-from delflection import ylst 
+from delflection import Cmc4lst10
+from delflection import ylst10
 
 ## assumed coordinate system: x forward (pointing to nose), y to the right (pointing to wingtip), z downwards
 
@@ -44,22 +44,22 @@ Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
 Tt = T*h*np.cos(sweep_LE*d2r)
 
 torque = []
-for element in ylst:
-    if element <= closest(ylst, (b/2)*0.35) and element > 0: #weight causes negative torque, thrust pos. torque
+for element in ylst10:
+    if element <= closest(ylst10, (b/2)*0.35) and element > 0: #weight causes negative torque, thrust pos. torque
         torque.append(Tt-Tw)
-    if element > closest(ylst, (b/2)*0.35):
+    if element > closest(ylst10, (b/2)*0.35):
         torque.append(0)
         
 moment = [] ## same sign as Tw
   
 chord_check = []  
-for i in range(len(ylst)):
-    moment.append(Cmc4lst[i]*0.5*rho*chord(ylst[i])*S*V**2) ## M = (1/2)Cm*rho*c*S*V^2
-    chord_check.append(chord(ylst[i]))
+for i in range(len(ylst10)):
+    moment.append(Cmc4lst10[i]*0.5*rho*chord(ylst10[i])*S*V**2) ## M = (1/2)Cm*rho*c*S*V^2
+    chord_check.append(chord(ylst10[i]))
 
 total = np.array(moment) + np.array(torque) ## questioning if the moment eq is correct
 
-plt.plot(ylst, total)
+plt.plot(ylst10, total)
 plt.show()
 
 #------------------------------------------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ def chord_calc(y):
 
 torsional_stiffness=[]
 integrands=[]
-for i in range(len(ylst)):
+for i in range(len(ylst10)):
     h_length = float(0.5*chord_calc(y_vals[i]))
     l_up=float(0.5004620365222*chord_calc(y_vals[i]))
     l_low=float(0.5003958533001*chord_calc(y_vals[i]))
@@ -182,40 +182,40 @@ for i in range(len(ylst)):
     t_3 = t_03 * chord_calc(y_vals[i])
     t_4 = t_04 * chord_calc(y_vals[i])
     T=float(total[i])
-    if ylst[i] <= L_4:
+    if ylst10[i] <= L_4:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,2,T))
-    elif ylst[i] > L_4:
+    elif ylst10[i] > L_4:
         integrands.append(torque_over_GJ(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,1,T))
-    if ylst[i] <= L_4 and ylst[i] != 0:
-        torsional_stiffness.append(torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,ylst[i],G))
-    elif ylst[i] > L_4 and ylst[i] != 0:
-        torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,ylst[i],G))
+    if ylst10[i] <= L_4 and ylst10[i] != 0:
+        torsional_stiffness.append(torsional_stiffness_double_cell(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,ylst10[i],G))
+    elif ylst10[i] > L_4 and ylst10[i] != 0:
+        torsional_stiffness.append(torsional_stiffness_single_cell(t_1,t_11,t_2,t_3,L_1,L_2,ylst10[i],G))
 
    #twist_angles.append(twist_angle(t_1,t_11,t_2,t_3,t_4,L_1,L_2,L_3,G,c,L_4,T))
 #def find_closest_value_index(input_list, target_value):
 #    closest_index = min(range(len(input_list)), key=lambda i: abs(input_list[i] - target_value))
 #    return closest_index
-#integrands_1 = integrands[:find_closest_value_index(ylst, (b/2)*0.35)]
-#integrands_2 = integrands[find_closest_value_index(ylst, (b/2)*0.35):] 
-#x_limit_1=ylst[:len(integrands_1)]
-#x_limit_2=ylst[len(integrands_1):]
+#integrands_1 = integrands[:find_closest_value_index(ylst10, (b/2)*0.35)]
+#integrands_2 = integrands[find_closest_value_index(ylst10, (b/2)*0.35):] 
+#x_limit_1=ylst10[:len(integrands_1)]
+#x_limit_2=ylst10[len(integrands_1):]
 
 #integral_values = sp.integrate.cumtrapz(integrands_1, x=x_limit_1, initial=0)
 #last_value = integral_values[-1]
 #integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
 #integral_values = integral_values*180/math.pi
 
-integral_values = sp.integrate.cumtrapz(integrands, x=ylst, initial=0)
+integral_values = sp.integrate.cumtrapz(integrands, x=ylst10, initial=0)
 #integral_values = np.append(integral_values, sp.integrate.cumtrapz(integrands_2, x=x_limit_2, initial=last_value))
 integral_values = integral_values*180/math.pi
 
-plt.plot(ylst,torsional_stiffness)
+plt.plot(ylst10,torsional_stiffness)
 plt.title("Torsional Stiffness diagram")
 plt.ylabel("Torsional Stiffness")
 plt.xlabel("Half Span[m]")
 plt.show()
 
-plt.plot(ylst, integral_values)
+plt.plot(ylst10, integral_values)
 plt.title("Twist angle diagram")
 plt.ylabel("twist angle[deg]")
 plt.xlabel("Half Span[m]")

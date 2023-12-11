@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 K = 4               # Clamped on both ends
 E = 68.9E9        # Pa     
 L = 33.5            # m  
-M = -3.1E8 / 46        # Nm  
+M = -7.9E8 / 46        # Nm  
 
 A = float(input("Cross-sectional area of the stringer (m^2): "))
 length = float(input("Length of the stringer (mm): ")) / 1000
