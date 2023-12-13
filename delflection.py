@@ -277,13 +277,13 @@ moi = np.zeros(70)
 for i in range (0,70):
     ylst[i] = i
     moi[i] = (calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,i))[0]
-'''
+
 plt.plot(ylst, moi)
 plt.xlabel('Spanwise location [m]')
 plt.ylabel('Moment of Inertia [$m^4$]')
 plt.title('Variation in Moment of Inertia')
 plt.show()
-'''
+
 
 
 def load_integrand(y):
@@ -306,7 +306,7 @@ sheardist = sheardistribution(yvalues)
 sheardist[0] = 0
 momentdist = momentdistribution(yvalues)
 momentdist[0] = 0
-
+'''
 plt.subplot(1,3,1)
 plt.plot(yvalues, sheardist, "b")
 plt.xlabel('Spanwise location [m]')
@@ -332,4 +332,17 @@ plt.ylabel('Deflection [m]')
 plt.title('Deflection Graph')
 
 plt.subplots_adjust(wspace=0.45)
+plt.show()
+'''
+Ixx = []
+z_value = []
+for element in yvalues:
+    Ixx.append(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,element)[0])
+    z_value.append(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,element)[2])
+
+def bendingstress_stringer(y):
+    return (momentdistribution(y) * z_value) / Ixx
+
+
+plt.plot(yvalues, bendingstress_stringer(yvalues))
 plt.show()
