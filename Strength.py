@@ -14,19 +14,19 @@ from ColumnBuckling import bendingstress_stringer
 
 yvalues = np.arange(0, 33.5, 0.01)
 
-stress_up=[]
-stress_down=[]
-yield_stres=[]
-n_spar=
-n_str1=
-safety_factor=
-load_factor=
+stress_up = []
+stress_down = []
+yield_stres = []
+n_spar =
+n_str1 =
+safety_factor =
+load_factor =
 
 for i in range(len(yvalues)):
-   t_1=
-   w_u1=
-   w_d1=
-   A1=
+   t_1 =
+   w_u1 =
+   w_d1 =
+   A1 =
    stress_up.append(bendingstress_stringer(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, yvalues[i])[2]))
    stress_down.append(bendingstress_stringer(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, yvalues[i])[1]))
    yield_stress.append(276000000)
