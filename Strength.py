@@ -51,15 +51,15 @@ else:
    margin_of_safety_tensional = yield_stress / stress_up
    i_for_tension = np.argmax(margin_of_safety_tensional > 2)
    
-plt.plot(yvalues, compressive_stress)
-plt.plot(yvalues, yield_stress)
+plt.plot(yvalues[:-1], compressive_stress)
+plt.plot(yvalues[:-1], yield_stress)
 plt.xlabel("span")
 plt.ylabel("compress stress")
 #plt.title("q")
 plt.show()
 
-plt.plot(yvalues, tension_stress)
-plt.plot(yvalues, yield_stress)
+plt.plot(yvalues[:-1], tension_stress)
+plt.plot(yvalues[:-1], yield_stress)
 plt.xlabel("span")
 plt.ylabel("tension stress")
 #plt.title("q")
