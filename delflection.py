@@ -4,11 +4,12 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
-rho = 0.324438
+rho = 1.225 #0.324438
 v = 242.958
 q = 0.5*rho*(v**2)
 halfspan = 33.5
 n = 2.5
+sf = 1.5
 b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
@@ -25,7 +26,7 @@ cr = 13.4 #m
 
 CL0 = 0.04647
 CL10 = 0.97586
-CLD = 0.5785
+CLD = 0.174647669
 
 # Create arrays for the values in the CSV file
 ylst0 = np.array([])
@@ -118,7 +119,10 @@ def cts_loaddistr(y):
         a = (-1 * (Ww * grav * 8)) / (b ** 2)
         f = a * y + c
     if y <= b / 4 and y > 0:
-        g = Wf * grav / (b / 4)
+        h = 8 * Wf * (1 - 1/2.56) * grav / b
+        d = 8 * Wf * grav / (2.56 * b)
+        m = (d - h) / (b / 4)
+        g = h + m * y
     if y > b / 4:
         g = 0
     return f + g  #f is structural weight, g is fuel weight
@@ -140,7 +144,7 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n)) #- cts_loaddistr(element))
+    liftdistributionlst = np.append(liftdistributionlst, ((LdistributionD(element)*n))) #3 - cts_loaddistr(element)) * sf)
 
 print(liftdistributionlst)
 plt.plot(yvalues, liftdistributionlst)
@@ -255,14 +259,14 @@ A1 = float(input('Enter the area of the stringers: '))
 n_str1 = int(input('Enter the number of stringers: '))
 
 # Calculate moment of inertia
-#moment_of_inertia = calculate_moment_of_inertia(t_1, w_u1, w_d1, A1, n_str1, y)
-#print("Moment of Inertia:", moment_of_inertia)
-
+moment_of_inertia, z, random = calculate_moment_of_inertia(n_spar,t_1, w_u1, w_d1, A1, n_str1, b/2)
+print("Moment of Inertia:", moment_of_inertia)
+print("Centroid: ", z)
 ylst = np.zeros(70)
 moi = np.zeros(70)
 for i in range (0,70):
     ylst[i] = i
-    moi[i] = (calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,i))
+    moi[i] = (calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,i))[0]
 '''
 plt.plot(ylst, moi)
 plt.xlabel('Spanwise location [m]')

@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import math
 import matplotlib.pyplot as plt
-from LiftWeight_ShearBendingDiagrams import ylst 
+
 
 b = 67
 Weng = 6630 
@@ -17,6 +17,9 @@ V = 258.9704
 S = 574.3 
 sweep_LE = 37.12 
 cr = 13.4 
+
+yvalues = np.zeros(70)
+ylst = np.zeros(70)
 
 def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     # Constants
