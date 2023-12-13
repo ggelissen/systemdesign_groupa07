@@ -38,23 +38,30 @@ stress_down = stress_down * load_factor * safety_factor
 
 if load_factor>=0:
    compressive_stress = stress_up
-   tensional_stress = stress_down
+   tension_stress = stress_down
    margin_of_safety_compressive = - yield_stress / stress_up
    i_for_compress = np.argmax(margin_of_safety_compressive > 2)
    margin_of_safety_tensional = yield_stress / stress_down
    i_for_tension = np.argmax(margin_of_safety_tensional > 2)
 else:
    compressive_stress = stress_down
-   tensional_stress = stress_up
+   tension_stress = stress_up
    margin_of_safety_compressive = - yield_stress / stress_down
    i_for_compress = np.argmax(margin_of_safety_compressive > 2)
    margin_of_safety_tensional = yield_stress / stress_up
    i_for_tension = np.argmax(margin_of_safety_tensional > 2)
    
-plt.plot(yvalues, stress)
+plt.plot(yvalues, compressive_stress)
 plt.plot(yvalues, yield_stress)
 plt.xlabel("span")
-plt.ylabel("stress")
+plt.ylabel("compress stress")
+#plt.title("q")
+plt.show()
+
+plt.plot(yvalues, tension_stress)
+plt.plot(yvalues, yield_stress)
+plt.xlabel("span")
+plt.ylabel("tension stress")
 #plt.title("q")
 plt.show()
 
