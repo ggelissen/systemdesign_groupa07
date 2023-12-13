@@ -31,7 +31,7 @@ for i in range(len(yvalues)):
    stress_down.append(bendingstress_stringer(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, yvalues[i])[1]))
    yield_stress.append(276000000)
 stress_up = np.array(stress_up[:-1])
-stress_down = np.array(stress_down[:-1])
+stress_down = np.array(stress_down[:-1]) * -1
 yield_stress = np.array(yield_stress[:-1])
 stress_up = stress_up * load_factor * safety_factor
 stress_down = stress_down * load_factor * safety_factor
