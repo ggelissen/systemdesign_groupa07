@@ -1,5 +1,6 @@
 import numpy as np
-from LiftWeight_ShearBendingDiagrams import momentdistribution
+import matplotlib.pyplot as plt 
+#from LiftWeight_ShearBendingDiagrams import momentdistribution
 from delflection import calculate_moment_of_inertia
 from ColumnBuckling import bendingstress_stringer
 
