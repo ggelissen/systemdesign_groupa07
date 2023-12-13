@@ -3,10 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Input Variables
-K = 4               # Clamped on both ends
+K = 4              # Clamped on both ends
 E = 68.9E9        # Pa     
-L = 33.5            # m  
-M = -7.9E8 / 46        # Nm  
+L = 1        # m  
+M = -1.14E8       # Nm  
 
 A = float(input("Cross-sectional area of the stringer (m^2): "))
 length = float(input("Length of the stringer (mm): ")) / 1000
@@ -83,7 +83,7 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     # Centroids and areas
     x_centroid = np.array([0, 0.5 * c, 0.5 * c, 0.5 * c * 0.5])
     x_centroids = np.concatenate((x_centroid, x_spar1))  # Taking into account spars
-    z_centroid = np.array([0.5 * f_spar, (0.0417 * c) + (0.5 * 0.0668 * c), f_spar - ((0.0665 - 0.0450) * c * 0.5), (0.0417 - 0.0218) * c * 0.5])
+    z_centroid = np.array([0.5 * f_spar, (0.0417 * c) + (0.5 * 0.0668 * c), f_spar, 0])#f_spar - ((0.0665 - 0.0450) * c * 0.5), (0.0417 - 0.0218) * c * 0.5])
     z_centroids = np.concatenate((z_centroid, z_spar1))
     l_part = np.array([f_spar, r_spar, np.sqrt((0.5 * c)**2 + ((0.0665 - 0.0450) * c)**2), np.sqrt((0.5 * c)**2 + ((0.0417 - 0.0218) * c)**2)])
     l_parts = np.concatenate((l_part, l_spar1))
@@ -110,7 +110,7 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.03, 0.03, 0.03, 0.004, 23, 33.5)
+Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.001, 20, 6)
 
 
 def columnbuckling_stringer(a, b, t):
@@ -122,6 +122,7 @@ print(columnbuckling_stringer(length, width, thickness))
 def bendingstress_stringer(z):
     return (M * z) / Ixx
 
+print(Ixx)
 print(bendingstress_stringer(z_down))
 print(bendingstress_stringer(z_up))
 
