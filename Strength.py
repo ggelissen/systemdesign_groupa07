@@ -11,15 +11,22 @@ from ColumnBuckling import bendingstress_stringer
 #   half_span = 33.45
 #   m = (c_tip - c_root) / half_span
 #   return c_root + (m * y)
-#
+
 yvalues = np.arange(0, 33.5, 0.01)
 
 stress=[]
+yield_stres=[]
 n_spar=
 n_str1=
+
 for i in range(len(yvalues)):
    t_1=
    w_u1=
    w_d1=
    A1=
    stress.append(bendingstress_stringer(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, yvalues[i])[2]))
+   yield_stress.append(-276000000)
+stress=np.array(stress)
+stress = stress * 1.5
+yield_stress=np.array(yield_stress)
+
