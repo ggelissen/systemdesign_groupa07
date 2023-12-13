@@ -283,7 +283,7 @@ def load_integrand(y):
     for element in y:
         momentvalues = momentdistributionlst[n]
         n = n+1
-        integrandlst = np.append(integrandlst, (momentvalues *- 1)/(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,element) * 69*10**9))
+        integrandlst = np.append(integrandlst, (momentvalues *- 1)/(calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1,element)[0] * 69*10**9))
     return integrandlst
 0.0
 def deflection(y):

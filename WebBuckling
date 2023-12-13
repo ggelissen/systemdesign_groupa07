@@ -15,22 +15,27 @@ span = 67  # m
 cr = 13.4
 taper = 0.28
 t_c = 0.113
+S = 574.3 #m^2
+sweep_LE = 37.12 #deg
 
 E = 68.9 * 10**9
 poisson = 0.33
 
+n = 2.5
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
 Weng = 6033  # kg
 grav = 9.81  # m/s^2
-n = 2.5
+
+T = 0
+h = 2.127 
+engcenter = 1.43 
+d2r = np.pi/180
 
 CL0 = 0.04647
 CL10 = 0.97586
 CLD = 0.5785
 
-
-""" shear distr. """ ## scroll down for the new stuff
 # Create arrays for the values in the CSV file
 ylst0 = np.array([])
 chordlst0 = np.array([])
@@ -90,7 +95,7 @@ def yCmc4(y, cmc4):
     return sp.interpolate.interp1d(y,cmc4,kind='cubic',fill_value="extrapolate")
 
 # Define set of values for y
-yvalues = np.arange(0, halfspan, 0.01)
+yvalues = np.arange(0, halfspan+0.01, 0.01)
 yCl_result0 = yCl(ylst0, Cllst0)
 ychord_result0 = ychord(ylst0, chordlst0)
 yICd_result0 = yICd(ylst0, ICdlst0)
@@ -102,10 +107,9 @@ yICd_result10 = yICd(ylst10, ICdlst10)
 yCmc4_result10 = yCmc4(ylst10, Cmc4lst10)
 
 # finding entry in list closest to val
-def closest(lst, val):
+def closest(lst, val):  
     lst = np.asarray(lst)
     idx = (np.abs(lst - val)).argmin()
-
     return lst[idx]
 
 # functions to define all loading distribution (ie decreasing triangular shape for dry, const for fuel)
@@ -158,18 +162,16 @@ shearlst = sheardistribution(yvalues)
 
 """ web definition """
 spanlocation = input("Enter the spanwise location: ")
-tf = float(input("Enter the thickness of the front spar: "))
-tr = float(input("Enter the thickness of the rear spar: "))
-tm = float(input("Enter the thickness of the mid spar: "))
+tf = float(input("Enter the thickness of the front spar[mm]: "))*(10**-3)
+tr = float(input("Enter the thickness of the rear spar[mm]: "))*(10**-3)
+tm = float(input("Enter the thickness of the mid spar[mm]: "))*(10**-3)
 nr = int(input("Enter the amount of ribs: "))
 
-t = (1/3)*(tf + tr + tm)
+t = (1/3)*(tf + tr + tm) # taking the average 
 
 def chord(y):
     return cr - cr*(1 - taper)*(y/(span/2))
 
-
-#avgsheardist = shearlst/((hf * tf + hr * tr + hm * tm))
 
 a = (span/2)/nr ## assuming equal spacing
 kslst = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
@@ -183,28 +185,47 @@ ks_interp = interpolation_function(a_b_interp)
 avg_b = []
 distr_ks = []
 distr_tau_cr = []
+distr_tau_avg = []
 bays = []
-#print(ks_interp)
+
+tolerance = 1e-10
+
 for nth in range(nr): ## dividing the calculations over the bays
+
     b1 = t_c*chord(nth*a) ## lefthandside, closest to root, evaluated at the nth bay
     b2 = t_c*chord((nth + 1)*a) ## closest to tip
     b = 0.5 * (b1 + b2)
     avg_b.append(b)
 
-    if round(a/b,2) < 3.5:
-        ks = float(ks_interp[np.where(a_b_interp == (round(a/b, 2)))[0]])
+    current_a_b = round(a/b1,2)
+    index_match = np.where(np.abs(a_b_interp - current_a_b) < tolerance)[0]
+
+    if index_match.size > 0 and current_a_b < 3.5:
+        ks = float(ks_interp[index_match[0]])
         distr_ks.append(ks)
-    if round(a/b, 2) >= 3.5:
+    else:
         ks = 9.6
         distr_ks.append(ks)
-    
-    tau_cr = ((ks*E*(np.pi**2)) / (12*(1-(poisson**2)))) * (t/b)**2 
+
+
+    tau_cr = ((ks*E*(np.pi**2)) / (12*(1-(poisson**2)))) * (t/b1)**2  ##adjust for all t
     distr_tau_cr.append(tau_cr)
+
+
+    ht = (tf + tm + tr)*b1  #height is b, which is the thickness of the spar at evaluated location
+
+    shear = sheardistribution(yvalues)
+    start = np.where(yvalues == closest(yvalues, nth*a))[0][0]
+    stop = np.where(yvalues == closest(yvalues,(nth+1)*a))[0][0]
+    shear_bay = shear[start:stop]
     
-    
-    bays.append(nth)
-print(distr_tau_cr)
-    
+    tau_avg = np.max(shear_bay)/ht
+
+    distr_tau_avg.append(tau_avg)
+    print("cr", tau_cr*10**-6, "avg", tau_avg*10**-6) #oh oh
+
+
+
 #plt.subplot(1,2,1)
 #plt.plot(bays,distr_tau_cr)
 
@@ -221,4 +242,5 @@ plt.xlabel('Spanwise location [m]')
 plt.ylabel('Average Shear')
 plt.title('Average Shear Distribution')"""
 #plt.show()
+
 
