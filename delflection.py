@@ -14,6 +14,7 @@ b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
 Weng = 6033  # kg
+Wlg = 11383.7 / 2
 grav = 9.81  # m/s^2
 T = 0
 h = 2.127 
@@ -105,12 +106,13 @@ def closest(lst, val):
     return lst[idx]
 
 # functions to define all loading distribution (ie decreasing triangular shape for dry, const for fuel)
-engload = []
+'''engload = []
 for element in yvalues:
     if element != closest(yvalues, (b / 2) * 0.35):
         engload.append(0)
     if element == closest(yvalues, (b / 2) * 0.35):
         engload.append(Weng * grav)
+'''
 def cts_loaddistr(y):
     if y == 0:
         f = g = 0
@@ -125,7 +127,15 @@ def cts_loaddistr(y):
         g = h + m * y
     if y > b / 4:
         g = 0
-    return f + g  #f is structural weight, g is fuel weight
+    if y == 5.8:
+        l = Wlg * grav 
+    else: 
+        l = 0
+    if y == 12:
+        e = Weng * grav
+    else:
+        e = 0
+    return f + g + e + l #f is structural weight, g is fuel weight
 
 # Angle of Attack
 alpha_sin = (CLD-CL0)/(CL10-CL0) * np.sin(10*np.pi/180)
@@ -144,7 +154,7 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, ((LdistributionD(element)*n))) #3 - cts_loaddistr(element)) * sf)
+    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element)*n)) - cts_loaddistr(element)) * sf)
 
 print(liftdistributionlst)
 plt.plot(yvalues, liftdistributionlst)
@@ -223,7 +233,7 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     # Centroids and areas
     x_centroid = np.array([0, 0.5 * c, 0.5 * c, 0.5 * c * 0.5])
     x_centroids = np.concatenate((x_centroid, x_spar1))  # Taking into account spars
-    z_centroid = np.array([0.5 * f_spar, (0.0417 * c) + (0.5 * 0.0668 * c), f_spar - ((0.0665 - 0.0450) * c * 0.5), (0.0417 - 0.0218) * c * 0.5])
+    z_centroid = np.array([0.5 * f_spar, (0.0417 * c) + (0.5 * 0.0668 * c), f_spar, 0])#f_spar - ((0.0665 - 0.0450) * c * 0.5), (0.0417 - 0.0218) * c * 0.5])
     z_centroids = np.concatenate((z_centroid, z_spar1))
     l_part = np.array([f_spar, r_spar, np.sqrt((0.5 * c)**2 + ((0.0665 - 0.0450) * c)**2), np.sqrt((0.5 * c)**2 + ((0.0417 - 0.0218) * c)**2)])
     l_parts = np.concatenate((l_part, l_spar1))
@@ -259,7 +269,7 @@ A1 = float(input('Enter the area of the stringers: '))
 n_str1 = int(input('Enter the number of stringers: '))
 
 # Calculate moment of inertia
-moment_of_inertia, z, random = calculate_moment_of_inertia(n_spar,t_1, w_u1, w_d1, A1, n_str1, b/2)
+moment_of_inertia, z, random = calculate_moment_of_inertia(n_spar,t_1, w_u1, w_d1, A1, n_str1, 0)
 print("Moment of Inertia:", moment_of_inertia)
 print("Centroid: ", z)
 ylst = np.zeros(70)
