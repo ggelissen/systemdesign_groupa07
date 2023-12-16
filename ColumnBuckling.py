@@ -121,8 +121,8 @@ def columnbuckling_stringer(a, b, t):
 
 print(columnbuckling_stringer(length, width, thickness))
 
-def bendingstress_stringer(z):
-    return (M * z) / Ixx
+def bendingstress_stringer(y, z):
+    return (M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)[0]
 
 print("The bending stress in lower half: ", bendingstress_stringer(z_down))
 print("The bending stress in upper half: ", bendingstress_stringer(z_up))
