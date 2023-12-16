@@ -143,7 +143,7 @@ yield_stress_compress = []
 load_factor = float(input("Load Factor: "))
 moment=[]
 for i in range(len(yvalues)):
-    moment.append(momentfunction(yvalues[i]))
+    #moment.append(momentfunction(yvalues[i]))
     #moment=momentdistribution(yvalues)
     stress_up.append(bendingstress_stringer(z_up))
     stress_down.append(bendingstress_stringer(z_down))
