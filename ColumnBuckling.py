@@ -4,16 +4,16 @@ import matplotlib.pyplot as plt
 from delflection import momentfunction
 
 # Input Variables
-K = 4              # Clamped on both ends
-E = 68.9E9        # Pa     
-L = float(input("Enter rib spacing: "))      # m  
-y = float(input("Enter spanwise position: "))
-M = momentfunction(y)     # Nm  
+K = 4                                           # Clamped on both ends
+E = 68.9E9                                      # Pa     
+# L = float(input("Enter rib spacing: "))       # m  
+y = 0 # float(input("Enter spanwise position: "))   # m
+M = momentfunction(y)                           # Nm  
 
-A = 0.001875 #float(input("Cross-sectional area of the stringer (m^2): "))
-length =  0.06 #float(input("Length of the stringer (mm): ")) / 1000
-width = 0.04 #float(input("Width of the stringer (mm): ")) / 1000
-thickness = 0.025 #float(input("Thickness of the stringer (mm): ")) / 1000
+A = 0.001875             #float(input("Cross-sectional area of the stringer (m^2): "))
+length =  0.06           #float(input("Length of the stringer (mm): ")) / 1000
+width = 0.04             #float(input("Width of the stringer (mm): ")) / 1000
+thickness = 0.025        #float(input("Thickness of the stringer (mm): ")) / 1000
 
 
 
@@ -115,22 +115,32 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)
 
 
-def columnbuckling_stringer(a, b, t):
-    global K, E, L, A
+def columnbuckling_stringer(a, b, t, L):
+    global K, E, A
     return (K * (np.pi**2) * E * momentofinertia_xx_stringer(a, b, t)) / (L**2 * A)
 
-print(columnbuckling_stringer(length, width, thickness))
 
 def bendingstress_stringer(y, z):
-    return (M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)[0]
+    return (-M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)[0]
 
-print("The bending stress in lower half: ", bendingstress_stringer(z_down))
-print("The bending stress in upper half: ", bendingstress_stringer(z_up))
 
-print("Moment is: ", M)
+def margin_of_safety_column(L):
+    global y, length, width, thickness, z_down
+    return columnbuckling_stringer(length, width, thickness, L) / bendingstress_stringer(y, z_down)
 
-#diff = columnbuckling_stringer(length, width, thickness) - bendingstress_stringer()
-#print(diff)
+# Iterate over rib spacing to find optimal value
+for rib_space in np.arange(0.25, 33.5, 0.1):
+    if margin_of_safety_column(rib_space) < 1:
+        print(f"Rib Spacing: {rib_space-0.1} m")
+        if y < 33.5 - (rib_space-0.1):
+            y += rib_space-0.1
+        else:
+            break
+    else:
+        continue
+
+
+'''
 #--------------------------------------------------------------
 #only works if M and Ixx vary. Otherwise it will be straight line 
 yvalues = np.arange(0, 33.5, 0.01)
@@ -219,3 +229,4 @@ plt.ylabel("margin of safety tension")
 #plt.title("q")
 plt.show()
 
+'''
