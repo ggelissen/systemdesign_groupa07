@@ -306,7 +306,7 @@ sheardist = sheardistribution(yvalues)
 sheardist[0] = 0
 momentdist = momentdistribution(yvalues)
 momentdist[0] = 0
-'''
+
 plt.subplot(1,3,1)
 plt.plot(yvalues, sheardist, "b")
 plt.xlabel('Spanwise location [m]')
@@ -333,7 +333,7 @@ plt.title('Deflection Graph')
 
 plt.subplots_adjust(wspace=0.45)
 plt.show()
-'''
+
 Ixx = []
 z_value = []
 for element in yvalues:

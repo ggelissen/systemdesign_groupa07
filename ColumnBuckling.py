@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 # Input Variables
 K = 4              # Clamped on both ends
 E = 68.9E9        # Pa     
-L = 1        # m  
-M = -1.14E8       # Nm  
+L = float(input("Enter rib spacing: "))      # m  
+y = float(input("Enter spanwise position: "))
+M = -1.1622E8       # Nm  
 
 A = float(input("Cross-sectional area of the stringer (m^2): "))
 length = float(input("Length of the stringer (mm): ")) / 1000
@@ -110,7 +111,7 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.001, 20, 6)
+Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)
 
 
 def columnbuckling_stringer(a, b, t):
