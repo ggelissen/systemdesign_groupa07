@@ -137,7 +137,8 @@ yvalues = np.arange(0, 33.5, 0.01)
 
 stress_up = []
 stress_down = []
-yield_stress = []
+yield_stress_tension = []
+yield_stress_compress = []
 
 load_factor = float(input("Load Factor: "))
 moment=[]
@@ -146,11 +147,12 @@ for i in range(len(yvalues)):
     #moment=momentdistribution(yvalues)
     stress_up.append(bendingstress_stringer(z_up))
     stress_down.append(bendingstress_stringer(z_down))
-    yield_stress.append(276000000)
+    yield_stress_tension.append(276000000)
+    yield_stress_compress.append(-241000000)
 stress_up = np.array(stress_up[:-1])
 stress_down = np.array(stress_down[:-1]) * -1
-yield_stress_compress = np.array(yield_stress[:-1]) * -1
-yield_stress_tension = np.array(yield_stress[:-1])
+yield_stress_compress = np.array(yield_stress_compress[:-1])
+yield_stress_tension = np.array(yield_stress_tension[:-1])
 stress_up = stress_up * load_factor
 stress_down = stress_down * load_factor
 
