@@ -190,8 +190,13 @@ moment = []
   
 for i in range(len(yvalues)):
     moment.append(yCmc4_result10(yvalues[i])*0.5*rho*chord(yvalues[i])*S*v**2) ## M = (1/2)Cm*rho*c*S*V^2
-    
 
+def y_moment(y, M):
+    return sp.interpolate.interp1d(y, M, kind='cubic', fill_value="extrapolate")
+
+momentfunction = y_moment(yvalues, moment)
+
+'''
 total = np.array(moment) + np.array(torque)
 
 
@@ -346,3 +351,4 @@ def bendingstress_stringer(y):
 
 plt.plot(yvalues, bendingstress_stringer(yvalues))
 plt.show()
+'''

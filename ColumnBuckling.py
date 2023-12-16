@@ -1,13 +1,14 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from delflection import momentfunction
 
 # Input Variables
 K = 4              # Clamped on both ends
 E = 68.9E9        # Pa     
 L = float(input("Enter rib spacing: "))      # m  
 y = float(input("Enter spanwise position: "))
-M = -1.1622E8       # Nm  
+M = momentfunction(y)       # Nm  
 
 A = float(input("Cross-sectional area of the stringer (m^2): "))
 length = float(input("Length of the stringer (mm): ")) / 1000
