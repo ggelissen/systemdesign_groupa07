@@ -8,7 +8,7 @@ K = 4              # Clamped on both ends
 E = 68.9E9        # Pa     
 L = float(input("Enter rib spacing: "))      # m  
 y = float(input("Enter spanwise position: "))
-M = momentfunction(y)       # Nm  
+M = momentfunction(y)     # Nm  
 
 A = 0.001875 #float(input("Cross-sectional area of the stringer (m^2): "))
 length =  0.06 #float(input("Length of the stringer (mm): ")) / 1000
@@ -124,9 +124,10 @@ print(columnbuckling_stringer(length, width, thickness))
 def bendingstress_stringer(z):
     return (M * z) / Ixx
 
-print(Ixx)
-print(bendingstress_stringer(z_down))
-print(bendingstress_stringer(z_up))
+print("The bending stress in lower half: ", bendingstress_stringer(z_down))
+print("The bending stress in upper half: ", bendingstress_stringer(z_up))
+
+print("Moment is: ", M)
 
 #diff = columnbuckling_stringer(length, width, thickness) - bendingstress_stringer()
 #print(diff)
