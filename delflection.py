@@ -191,7 +191,7 @@ for i in range(len(yvalues)):
 def y_moment(y, M):
     return sp.interpolate.interp1d(y, M, kind='cubic', fill_value="extrapolate")
 
-momentfunction = y_moment(yvalues, moment)
+momentfunction = y_moment(yvalues, momentdistribution(yvalues))
 
 '''
 total = np.array(moment) + np.array(torque)
