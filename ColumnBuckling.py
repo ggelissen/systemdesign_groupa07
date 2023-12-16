@@ -171,6 +171,20 @@ else:
    margin_of_safety_tensional = yield_stress_tension / stress_up
    #i_for_tension = np.argmax(margin_of_safety_tensional > 2)
 
+#check the value
+found_compress = False
+for i in range(len(compressive_stress)):
+    if compressive_stress[i] < -241000000:
+        print(f"Value smaller than -241000000 found in compress")
+        found_compress = True
+        break
+found_tension = False
+for i in range(len(tension_stress)):
+    if tension_stress[i] > 267000000:
+        print(f"Value larger than 267000000 found in tension")
+        found_tension = True
+        break
+        
 #plt.plot(yvalues, moment)
 #plt.xlabel("span")
 #plt.ylabel("compress stress")
