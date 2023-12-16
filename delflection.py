@@ -156,9 +156,6 @@ liftdistributionlst = np.array([])
 for element in yvalues:
     liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element)*n)) - cts_loaddistr(element)) * sf)
 
-print(liftdistributionlst)
-plt.plot(yvalues, liftdistributionlst)
-plt.show()
 
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)

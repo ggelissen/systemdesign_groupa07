@@ -10,10 +10,10 @@ L = float(input("Enter rib spacing: "))      # m
 y = float(input("Enter spanwise position: "))
 M = momentfunction(y)       # Nm  
 
-A = float(input("Cross-sectional area of the stringer (m^2): "))
-length = float(input("Length of the stringer (mm): ")) / 1000
-width = float(input("Width of the stringer (mm): ")) / 1000
-thickness = float(input("Thickness of the stringer (mm): ")) / 1000
+A = 0.001875 #float(input("Cross-sectional area of the stringer (m^2): "))
+length =  0.06 #float(input("Length of the stringer (mm): ")) / 1000
+width = 0.04 #float(input("Width of the stringer (mm): ")) / 1000
+thickness = 0.025 #float(input("Thickness of the stringer (mm): ")) / 1000
 
 
 
