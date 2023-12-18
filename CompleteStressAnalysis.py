@@ -39,6 +39,7 @@ E = 68.9 * 10 ** 9
 G = 26 * 10 ** 9
 poisson = 0.33
 t_c = 0.113
+k_v = 2
 
 # Stringer Properties
 A = 0.001875             #float(input("Cross-sectional area of the stringer (m^2): "))
@@ -181,6 +182,10 @@ def sheardistribution(y):
     sheardistributionlst = np.flip(shear)
     return sheardistributionlst
 
+def y_shear(y, S):
+    return sp.interpolate.interp1d(y, S, kind='cubic', fill_value="extrapolate")
+shearfunction = y_shear(yvalues, sheardistribution(yvalues))
+
 def momentdistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     moment = integrate.cumtrapz(shear, yvalues, initial=0)
@@ -212,6 +217,10 @@ for i in range(len(yvalues)):
     moment.append(yCmc4_result10(yvalues[i])*0.5*rho*chord(yvalues[i])*S*v**2)
 
 total_torque = np.array(moment) + np.array(torque)
+
+def y_torque(y, T):
+    return sp.interpolate.interp1d(y, T, kind='cubic', fill_value="extrapolate")
+torquefunction = y_torque(yvalues, total_torque)
 
 
 
@@ -350,7 +359,7 @@ for value in yvalues:
     tau_cr_m.append(webbuckling_crit(tm, value))
     tau_cr_r.append(webbuckling_crit(tr, value))
     
-    tau_avg.append(webbuckling_avg(sheardist[i], value))
+    tau_avg.append(webbuckling_avg(shearfunction(value), value))
     tau_torque_f.append(webbuckling_torque(total_torque[i], value)[0])
     tau_torque_m.append(webbuckling_torque(total_torque[i], value)[1])
     tau_torque_r.append(webbuckling_torque(total_torque[i], value)[2])
@@ -516,4 +525,16 @@ for i in range(len(tension_stress)):
         print(f"Value larger than 267000000 found in tension")
         found_tension = True
         break
-    
+
+
+
+## ------------------- Printing Statements ------------------- ##
+
+y_value = float(input("Enter spanwise position: "))
+
+# Web Buckling
+print("Web Buckling")
+print(f"Critical shear stress: {webbuckling_crit(tf, y_value)}")
+print(f"True shear stress: {webbuckling_avg(shearfunction(y_value), y_value) * k_v + webbuckling_torque(torquefunction(y_value), y_value)[0]}")
+
+# Skin Buckling
