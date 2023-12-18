@@ -300,6 +300,9 @@ tr = float(input("Enter the thickness of the rear spar [mm]: "))*(10**-3)
 tm = float(input("Enter the thickness of the mid spar [mm]: "))*(10**-3)
 tsk = float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
 nr = int(input("Enter the amount of ribs: "))
+ns = int(input("Enter the amount of spars: "))
+stringerarea = float(input("Enter the cross-sectional area of the stringer [m^2]: "))
+stringernumber = int(input("Enter the number of stringers [#]: "))
 
 a = (b/2)/nr ## assuming equal spacing
 
@@ -381,34 +384,27 @@ a_h_interp_skin = np.linspace(0.7, 4, 331)
 ks_interp_skin = interpolation_function_skin(a_h_interp_skin)
 
 distr_kc_skin = []
-
-def sigma_cr(t, y):
+def skinbuckling_crit(t, y):
+    tolerance = 1e-10
     h = chord(y) * 0.5
     if a <= h:
         current_a_h = round(h / a, 2)  # h is the chord, a is the rib pitch
     elif h < a:
         current_a_h = round(a / h, 2)
-    index_match = np.where(np.abs(a_h_interp - current_a_h) < tolerance)[0]
+    index_match = np.where(np.abs(a_h_interp_skin - current_a_h) < tolerance)[0]
     if index_match.size > 0 and current_a_h < 4:
-        kc = float(ks_interp[index_match[0]])
-        distr_kc.append(kc)
+        kc = float(ks_interp_skin[index_match[0]])
+        distr_kc_skin.append(kc)
     else:
         kc = 7.2
-        distr_kc.append(ks)
+        distr_kc_skin.append(ks)
     if a <= h:  
         return ((E * 7 * np.pi ** 2) / (12 * (1 - poisson ** 2))) * (t / a) ** 2
     elif h < a:  
         return ((E * 7 * np.pi ** 2) / (12 * (1 - poisson ** 2))) * (t / h) ** 2
 
-def sigma(moment, tsk, y):
-    h = chord(y)
-    # Moment of inertia of skin plate (cross-section)
-    m_inertia = (h * (tsk**3))/12
-    # Stringer inertia: Parallel axis theorem, modelled as 1 large square minus 1 smaller square
-    stringer_inertiaL = (strfl*(strfl ** 3))/12 + (strfl*strfl) * (((tsk + strfl)/2) ** 2)
-    stringer_inertiaS = ((strfl - tstr)*((strfl - tstr) ** 3))/12 + ((strfl - tstr)*(strfl - tstr)) * (((tsk + strfl + tstr)/2) ** 2)
-    stringer_inertia = stringer_inertiaL - stringer_inertiaS
-    return (moment*(tsk/2))/(m_inertia + (strnr * stringer_inertia))
+def skinbuckling_bendingstress(y, z):
+    return (-momentfunction(y) * z) / calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y)[0]
 
 momentlst = momentdistribution(yvalues)
 sigma_cr_lst = []
@@ -417,10 +413,9 @@ margin_of_safety_skin = []
 
 for i in range(3350):
     moment_span_location = -1*momentlst[i]
-    sigma_cr_lst.append(sigma_cr(tsk, i/100))
-    sigma_lst.append(sigma(moment_span_location, tsk, i/100))
-    print(sigma(moment_span_location, tsk, i/100)/sigma_cr(tsk, i/100))
-    margin_of_safety_skin.append(sigma(moment_span_location, tsk, i/100)/sigma_cr(tsk, i/100))
+    sigma_cr_lst.append(skinbuckling_crit(tsk, i/100))
+    sigma_lst.append(skinbuckling_bendingstress(moment_span_location, i/100))
+    margin_of_safety_skin.append(skinbuckling_bendingstress(moment_span_location, i/100)/skinbuckling_crit(tsk, i/100))
 
 
 
@@ -534,7 +529,10 @@ y_value = float(input("Enter spanwise position: "))
 
 # Web Buckling
 print("Web Buckling")
-print(f"Critical shear stress: {webbuckling_crit(tf, y_value)}")
-print(f"True shear stress: {webbuckling_avg(shearfunction(y_value), y_value) * k_v + webbuckling_torque(torquefunction(y_value), y_value)[0]}")
+print(f"Critical stress: {webbuckling_crit(tf, y_value)}")
+print(f"True stress: {webbuckling_avg(shearfunction(y_value), y_value) * k_v + webbuckling_torque(torquefunction(y_value), y_value)[0]}")
 
 # Skin Buckling
+print("Skin Buckling")
+print(f"Critical stress: {skinbuckling_crit(tsk, y_value)}")
+print(f"True stress: {skinbuckling_bendingstress(y_value, calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2])}")
