@@ -193,7 +193,7 @@ def y_moment(y, M):
 
 momentfunction = y_moment(yvalues, momentdistribution(yvalues))
 
-'''
+
 total = np.array(moment) + np.array(torque)
 
 
@@ -226,14 +226,14 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     if n_spar > 2:
         for i in range(n_spar - 2):
             l_spar1[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
-            x_spar1[i] = c * i * 0.5 / (n_spar - 1)     
-            z_spar1[i] = (c * (i * m_down * 0.5 /(n_spar - 1))) + (l_spar1[i]) * 0.5
+            x_spar1[i] = c * (i + 1) * 0.5 / (n_spar - 1)     
+            z_spar1[i] = (c * ((i+1) * m_down * 0.5 /(n_spar - 1))) + (l_spar1[i]) * 0.5
             t_spar[i] = t
             l_moi[i] = t
-            h_moi[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
+            h_moi[i] = c * ((0.0665 - ((i+1) * m_up * 0.5 /(n_spar - 1))) + (0.0417 - ((i+1) * m_down * 0.5 /(n_spar - 1))))
 
     # Centroids and areas
-    x_centroid = np.array([0, 0.5 * c, 0.5 * c, 0.5 * c * 0.5])
+    x_centroid = np.array([0, 0.5 * c, 0.5 * c * 0.5 0.5 * c * 0.5])
     x_centroids = np.concatenate((x_centroid, x_spar1))  # Taking into account spars
     z_centroid = np.array([0.5 * f_spar, (0.0417 * c) + (0.5 * 0.0668 * c), f_spar, 0])#f_spar - ((0.0665 - 0.0450) * c * 0.5), (0.0417 - 0.0218) * c * 0.5])
     z_centroids = np.concatenate((z_centroid, z_spar1))
@@ -348,4 +348,3 @@ def bendingstress_stringer(y):
 
 plt.plot(yvalues, bendingstress_stringer(yvalues))
 plt.show()
-'''

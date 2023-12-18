@@ -140,7 +140,7 @@ for rib_space in np.arange(0.25, 33.5, 0.1):
         continue
 
 
-'''
+
 #--------------------------------------------------------------
 #only works if M and Ixx vary. Otherwise it will be straight line 
 yvalues = np.arange(0, 33.5, 0.01)
