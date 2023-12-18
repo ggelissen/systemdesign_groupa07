@@ -377,4 +377,26 @@ def tau_T(torque, tf, tm, tr, tsk, y):
 # next up: find vals for critical tau (integrate?? or use step size of sheardist array)
 # check if tau_T function works 
 # find vals for tau_max (which is kv*tau_avg,max + tau_T,max)
-# also figure out what to do for kv 
+# also figure out what to do for kv -> gonna be 2, due to time constraints
+
+tau_cr_f = []
+tau_cr_m = []
+tau_cr_r = []
+
+tau_ave = []
+tau_torque_f = []
+tau_torque_m = []
+tau_torque_r = []
+
+i = 0
+for value in yvalues:
+    tau_cr_f.append(tau_cr(tf, value))
+    tau_cr_m.append(tau_cr(tm, value))
+    tau_cr_r.append(tau_cr(tr, value))
+    
+    tau_ave.append(tau_avg(sheardist[i], tf, tm, tr, value))
+    tau_torque_f.append(tau_T(total_torque[i], tf, tm, tf, tsk, value)[0])
+    tau_torque_m.append(tau_T(total_torque[i], tf, tm, tr, tsk, value)[1])
+    tau_torque_r.append(tau_T(total_torque[i], tf, tm, tr, tsk, value)[2])
+    
+    i += 1 
