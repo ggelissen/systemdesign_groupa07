@@ -111,14 +111,19 @@ for element in yvalues:
     if element == closest(yvalues, (b / 2) * 0.35):
         engload.append(Weng * grav)
 def cts_loaddistr(y):
-    if y == 0:
-        f = g = 0
-    if y != 0:
+    f=0
+    g=0
+    #if y == 0:
+    #   f = g = 0
+    if y >= 0:
         c = 4 * Ww * grav / b
         a = (-1 * (Ww * grav * 8)) / (b ** 2)
         f = a * y + c
-    if y <= b / 4 and y > 0:
-        g = Wf * grav / (b / 4)
+    if y <= b / 4 and y >= 0:
+        h = 8 * Wf * (1 - 1/2.56) * grav / b
+        d = 8 * Wf * grav / (2.56 * b)
+        m = (d - h) / (b / 4)
+        g = h + m * y
     if y > b / 4:
         g = 0
     return f + g  #f is structural weight, g is fuel weight
@@ -140,16 +145,35 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n) - cts_loaddistr(element))
-
+    liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n) - cts_loaddistr(element))   
+plt.plot(yvalues, liftdistributionlst, "r")
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Deflection [m]')
+plt.title('Deflection Graph')
+plt.show()
+liftdistributionlst = np.flip(liftdistributionlst)        
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
+    for i in range(len(yvalues)):
+        if yvalues[i] <= (b / 2) * 0.35:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+    for i in range(len(yvalues)):
+        if yvalues[i] <= 5.8:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
     return sheardistributionlst
 
 def momentdistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
-    moment = integrate.cumtrapz(shear, yvalues, initial=0)
+    sheardistributionlst = np.flip(shear)
+    for i in range(len(yvalues)):
+        if yvalues[i] <= (b / 2) * 0.35:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+    for i in range(len(yvalues)):
+        if yvalues[i] <= 5.8:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+    sheardistributionlst = np.flip(sheardistributionlst)
+    moment = integrate.cumtrapz(sheardistributionlst, y, initial=0)
     momentdistributionlst = -1 * np.flip(moment)
     return momentdistributionlst
 
@@ -179,7 +203,16 @@ total = np.array(moment) + np.array(torque)
 sheardist = sheardistribution(yvalues)
 sheardist[0] = 0
 momentdist = momentdistribution(yvalues)
-momentdist[0] = 0
+
+def momentone(y):
+    i=np.where(yvalues == y)[0]
+    return momentdist[i]
+        
+
+def y_moment(y, M):
+    return sp.interpolate.interp1d(y, M, kind='cubic', fill_value="extrapolate")
+
+momentfunction = y_moment(yvalues, momentdistribution(yvalues))
 
 plt.subplot(1,3,1)
 plt.plot(yvalues, sheardist, "b")
@@ -201,10 +234,10 @@ plt.ylabel('Torque [Nm]')
 plt.title('Torque Distribution')
 plt.show()
 
-plt.plot(yvalues, deflection(yvalues), "r")
-plt.xlabel('Spanwise location [m]')
-plt.ylabel('Deflection [m]')
-plt.title('Deflection Graph')
+##plt.plot(yvalues, deflection(yvalues), "r")
+##plt.xlabel('Spanwise location [m]')
+##plt.ylabel('Deflection [m]')
+##plt.title('Deflection Graph')
 
 plt.subplots_adjust(wspace=0.45)
-plt.show()
+#plt.show()
