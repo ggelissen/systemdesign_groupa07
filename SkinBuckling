@@ -201,17 +201,24 @@ tolerance = 1e-10
 
 
 def sigma_cr(t, y):
-    h = chord(y)
-    current_a_h = round(h / a, 2)  # h is the chord, a is the rib pitch
+    h = chord(y) * 0.5
+    if a <= h:
+        current_a_h = round(h / a, 2)  # h is the chord, a is the rib pitch
+    elif h < a:
+        current_a_h = round(a / h, 2)
     index_match = np.where(np.abs(a_h_interp - current_a_h) < tolerance)[0]
     if index_match.size > 0 and current_a_h < 4:
-        ks = float(ks_interp[index_match[0]])
-        distr_kc.append(ks)
+        kc = float(ks_interp[index_match[0]])
+        distr_kc.append(kc)
     else:
-        ks = 7.2
+        kc = 7.2
         distr_kc.append(ks)
-    return ((E * ks * np.pi ** 2) / (12 * (1 - poisson ** 2))) * (t / a) ** 2
+    if a <= h:  
+        return ((E * 7 * np.pi ** 2) / (12 * (1 - poisson ** 2))) * (t / a) ** 2
+    elif h < a:  
+        return ((E * 7 * np.pi ** 2) / (12 * (1 - poisson ** 2))) * (t / h) ** 2
 
+print(sigma_cr(tsk,0.9))
 
 def sigma(moment, tsk, y):
     h = chord(y)
@@ -222,8 +229,8 @@ def sigma(moment, tsk, y):
     stringer_inertiaS = ((strfl - tstr)*((strfl - tstr) ** 3))/12 + ((strfl - tstr)*(strfl - tstr)) * (((tsk + strfl + tstr)/2) ** 2)
     stringer_inertia = stringer_inertiaL - stringer_inertiaS
     return(moment*(tsk/2))/(m_inertia + (strnr * stringer_inertia))
-
-
+print(sigma(-1.54E08, tsk, 1.2))
+'''
 momentlst = momentdistribution(yvalues)
 sigma_cr_lst = []
 sigma_lst = []
@@ -240,3 +247,4 @@ for i in range(3350):
 #plt.plot(yvalues, sigma_lst, "r")
 plt.plot(yvalues, safetyfactor)
 plt.show()
+'''
