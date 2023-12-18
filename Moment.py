@@ -23,6 +23,8 @@ S = 574.3 #m^2
 sweep_LE = 37.12 #deg
 cr = 13.4 #m 
 
+sf = 1.5 # safety factor
+
 CL0 = 0.04647
 CL10 = 0.97586
 CLD = 0.5785
@@ -145,7 +147,7 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n) - cts_loaddistr(element))   
+    liftdistributionlst = np.append(liftdistributionlst, ((LdistributionD(element)) - cts_loaddistr(element)) * n * sf)
 #plt.plot(yvalues, liftdistributionlst, "r")
 #plt.xlabel('Spanwise location [m]')
 #plt.ylabel('Deflection [m]')
@@ -156,10 +158,10 @@ def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] <= (b / 2) * 0.35:
+        if yvalues[i] == (b / 2) * 0.35:
             sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
     for i in range(len(yvalues)):
-        if yvalues[i] <= 5.8:
+        if yvalues[i] == 5.8:
             sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
     return sheardistributionlst
 
@@ -167,10 +169,10 @@ def momentdistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] <= (b / 2) * 0.35:
+        if yvalues[i] == (b / 2) * 0.35:
             sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
     for i in range(len(yvalues)):
-        if yvalues[i] <= 5.8:
+        if yvalues[i] == 5.8:
             sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
     sheardistributionlst = np.flip(sheardistributionlst)
     moment = integrate.cumtrapz(sheardistributionlst, y, initial=0)

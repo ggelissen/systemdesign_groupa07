@@ -154,7 +154,7 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element)*n)) - cts_loaddistr(element)) * sf)
+    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element))) - cts_loaddistr(element)) * sf * n)
 
 
 def sheardistribution(y):
@@ -193,7 +193,7 @@ def y_moment(y, M):
 
 momentfunction = y_moment(yvalues, momentdistribution(yvalues))
 
-'''
+
 total = np.array(moment) + np.array(torque)
 
 
@@ -261,7 +261,7 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
         I_x = np.append(I_x, A1 * ((z_str2 - centroid_z)**2))
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
-'''
+
 # Input values
 n_spar = int(input('Enter the number of spars: '))
 t_1 = float(input('Enter the spar thickness: '))
@@ -348,4 +348,3 @@ def bendingstress_stringer(y):
 
 plt.plot(yvalues, bendingstress_stringer(yvalues))
 plt.show()
-'''
