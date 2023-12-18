@@ -302,7 +302,7 @@ tsk = float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
 nr = int(input("Enter the amount of ribs: "))
 ns = int(input("Enter the amount of spars: "))
 stringerarea = float(input("Enter the cross-sectional area of the stringer [m^2]: "))
-stringernumber = float(input("Enter the number of stringers [#]: "))
+stringernumber = int(input("Enter the number of stringers [#]: "))
 
 a = (b/2)/nr ## assuming equal spacing
 
