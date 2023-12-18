@@ -364,7 +364,9 @@ def tau_T(torque, tf, tm, tr, tsk, y):
     Af = chord(y)*t_c*wf
     Ar = chord(y)*t_c*wr
     
-    matr_A = np.array([(chord(y)/2)/(Af*tsk*G) + (chord(y)*t_c)/(2*Af*tf*G) + (chord(y)*t_c)/(2*Af*tm*G), -(chord(y)*t_c)/(2*Af*tm*G), -1], [-(chord(y)*t_c)/(2*Ar*tm*G), (chord(y)/2)/(Ar*tsk*G) + (chord(y)*t_c)/(2*Ar*tr*G) + (chord(y)*t_c)/(2*Ar*tm*G), -1], [2*Af, 2*Ar, 0])
+    matr_A = np.array([[(chord(y)/2)/(Af*tsk*G) + (chord(y)*t_c)/(2*Af*tf*G) + (chord(y)*t_c)/(2*Af*tm*G), -(chord(y)*t_c)/(2*Af*tm*G), -1], 
+    [-(chord(y)*t_c)/(2*Ar*tm*G), (chord(y)/2)/(Ar*tsk*G) + (chord(y)*t_c)/(2*Ar*tr*G) + (chord(y)*t_c)/(2*Ar*tm*G), -1], 
+    [2*Af, 2*Ar, 0]])
     matr_B= np.array([0, 0, torque])
     
     matr_C = np.linalg.solve(matr_A, matr_B)
