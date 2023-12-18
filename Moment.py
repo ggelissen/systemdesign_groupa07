@@ -146,11 +146,11 @@ def LdistributionD(x):
 liftdistributionlst = np.array([])
 for element in yvalues:
     liftdistributionlst = np.append(liftdistributionlst, (LdistributionD(element)*n) - cts_loaddistr(element))   
-plt.plot(yvalues, liftdistributionlst, "r")
-plt.xlabel('Spanwise location [m]')
-plt.ylabel('Deflection [m]')
-plt.title('Deflection Graph')
-plt.show()
+#plt.plot(yvalues, liftdistributionlst, "r")
+#plt.xlabel('Spanwise location [m]')
+#plt.ylabel('Deflection [m]')
+#plt.title('Deflection Graph')
+#plt.show()
 liftdistributionlst = np.flip(liftdistributionlst)        
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
