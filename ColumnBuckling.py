@@ -104,15 +104,15 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
         I_x[i] = (l_x[i] * h_x[i]**3 / 12) + (l_parts[i] * t_parts[i]) * ((z_centroids[i] - centroid_z)**2)
 
     # Stringer contributions
-    z_str1 = f_spar - ((0.0665 - 0.0450) * c * 0.5)
-    z_str2 = (0.0417 - 0.0218) * c * 0.5
+    z_str1 = f_spar #- ((0.0665 - 0.0450) * c * 0.5)
+    z_str2 = 0 #(0.0417 - 0.0218) * c * 0.5
     for i in range(n_str1):
         I_x = np.append(I_x, A1 * ((z_str1 - centroid_z)**2))
         I_x = np.append(I_x, A1 * ((z_str2 - centroid_z)**2))
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)
+Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.03, 0.04, 0.04, 0.002, 24, y)
 
 
 def columnbuckling_stringer(a, b, t, L):
@@ -121,7 +121,7 @@ def columnbuckling_stringer(a, b, t, L):
 
 
 def bendingstress_stringer(y, z):
-    return (-M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)[0]
+    return (-M * z) / calculate_moment_of_inertia(3, 0.03, 0.04, 0.04, 0.002, 24, y)[0]
 
 print(bendingstress_stringer(y,z_down))
 
