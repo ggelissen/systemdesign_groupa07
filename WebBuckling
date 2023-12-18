@@ -161,11 +161,11 @@ def LdistributionD(x):
 liftdistributionlst = np.array([])
 for element in yvalues:
     liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element)*n)) - cts_loaddistr(element)) * sf)
-
+'''
 print(liftdistributionlst)
 plt.plot(yvalues, liftdistributionlst)
 plt.show()
-
+'''
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
@@ -265,19 +265,19 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
         I_x = np.append(I_x, A1 * ((z_str2 - centroid_z)**2))
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
-
+'''
 # Input values
 n_spar = int(input('Enter the number of spars: '))
 t_1 = float(input('Enter the spar thickness: '))
 w_u1 = float(input('Enter the thickness of upper skin: '))
 w_d1 = float(input('Enter the thickness of lower skin: '))
 A1 = float(input('Enter the area of the stringers: '))
-n_str1 = int(input('Enter the number of stringers: '))
+n_str1 = int(input('Enter the number of stringers: ')) 
 
 # Calculate moment of inertia
 moment_of_inertia, z, random = calculate_moment_of_inertia(n_spar,t_1, w_u1, w_d1, A1, n_str1, 0)
-print("Moment of Inertia:", moment_of_inertia)
-print("Centroid: ", z)
+#print("Moment of Inertia:", moment_of_inertia)
+#print("Centroid: ", z)
 ylst = np.zeros(70)
 moi = np.zeros(70)
 for i in range (0,70):
@@ -290,7 +290,7 @@ plt.ylabel('Moment of Inertia [$m^4$]')
 plt.title('Variation in Moment of Inertia')
 plt.show()
 
-
+'''
 
 def load_integrand(y):
     momentdistributionlst = momentdistribution(yvalues)
@@ -317,7 +317,7 @@ tf = float(input("Enter the thickness of the front spar[mm]: "))*(10**-3)
 tr = float(input("Enter the thickness of the rear spar[mm]: "))*(10**-3)
 tm = float(input("Enter the thickness of the mid spar[mm]: "))*(10**-3)
 nr = int(input("Enter the amount of ribs: "))
-
+tsk = float(input("Enter skin thickness: "))
 ## need to calculate three kinds of shear stress;
 ## critical tau - material & geometry dependent (pi^2KsE/12(1-poisson^2))*(t/b)^2
 ## avg and torsion tau - due to loading
@@ -336,7 +336,7 @@ distr_ks = []
 
 tolerance = 1e-10
 def tau_cr(t, y):
-    h = chord(y)
+    h = 0.1082 * chord(y)
     
     current_a_h = round(a/h,2)
     index_match = np.where(np.abs(a_h_interp - current_a_h) < tolerance)[0]
@@ -349,7 +349,7 @@ def tau_cr(t, y):
     return ((E*ks*np.pi**2)/(12*(1 - poisson**2)))*(t/h)**2
 
 def tau_avg(shear, tf, tm, tr, y):
-    h = chord(y)
+    h = chord(y) * 0.1082
     
     return shear/((tf + tm + tr)*h)
 
@@ -402,3 +402,8 @@ for value in yvalues:
     tau_torque_r.append(tau_T(total_torque[i], tf, tm, tr, tsk, value)[2])
     
     i += 1 
+
+print(tau_cr(tf, 0))
+print(tau_avg(sheardist[0], tf, tm, tr, 0) * 2 + tau_T(total_torque[0], tf, tm, tf, tsk, 0)[0])
+
+
