@@ -4,26 +4,29 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
+# Critical Loading Conditions
+v = 258.9704
+n = 2.5
+
 rho = 1.225
-v = 242.958
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-n = 2.5
-sf = 1.5
-b = 67  # m
-Ww = 38229.5 / 2  # kg
-Wf = (125407 + 522.9) / 2  # kg
-Weng = 6033  # kg
+safetyfactor = 1.5
+b = 67 
+Ww = 38229.5 / 2 
+Wf = (125407 + 522.9) / 2 
+Weng = 6033 
 Wlg = 11383.7 / 2
-grav = 9.81  # m/s^2
+grav = 9.81 
 T = 0
 h = 2.127
 engcenter = 1.43
 taper = 0.28
 d2r = np.pi/180
-S = 574.3 #m^2
-sweep_LE = 37.12 #deg
-cr = 13.4 #m
+S = 574.3
+sweep_LE = 37.12
+cr = 13.4
+ct = 3.8
 
 # Aerodynamic Properties
 CL0 = 0.04647
@@ -44,7 +47,7 @@ width = 0.04             #float(input("Width of the stringer (mm): ")) / 1000
 thickness = 0.025        #float(input("Thickness of the stringer (mm): ")) / 1000
 
 
-## ------------------- Load Analysis ------------------- ##
+## ------------------- Data Import ------------------- ##
 
 
 # Create arrays for the values in the CSV file
@@ -117,6 +120,12 @@ ychord_result10 = ychord(ylst10, chordlst10)
 yICd_result10 = yICd(ylst10, ICdlst10)
 yCmc4_result10 = yCmc4(ylst10, Cmc4lst10)
 
+
+
+## ------------------- Loading Analysis ------------------- ##
+
+
+
 # finding entry in list closest to val
 def closest(lst, val):
     lst = np.asarray(lst)
@@ -165,7 +174,7 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element)*n)) - cts_loaddistr(element)) * sf)
+    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element)*n)) - cts_loaddistr(element)) * safetyfactor)
 
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
@@ -188,6 +197,22 @@ def chord(y):
 sheardist = sheardistribution(yvalues)
 sheardist[0] = 0
 
+Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
+Tt = T*h*np.cos(sweep_LE*d2r)
+
+torque = []
+for element in yvalues:
+    if element <= closest(yvalues, (b/2)*0.35) and element >= 0:
+        torque.append(Tt-Tw)
+    if element > closest(yvalues, (b/2)*0.35):
+        torque.append(0)
+        
+moment = []
+for i in range(len(yvalues)):
+    moment.append(yCmc4_result10(yvalues[i])*0.5*rho*chord(yvalues[i])*S*v**2)
+
+total_torque = np.array(moment) + np.array(torque)
+
 
 
 ## ------------------- Moment of Inertia ------------------- ##
@@ -195,14 +220,9 @@ sheardist[0] = 0
 
 
 def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
-    # Constants
-    c_root = 13.4
-    c_tip = 3.8
-    half_span = 33.45
-    m = (c_tip - c_root) / half_span
-
     # Wing geometry
-    c = c_root + (m * y)
+    m = (ct - cr) / halfspan
+    c = cr + (m * y)
     f_spar = 0.1082 * c
     r_spar = 0.0668 * c
 
@@ -259,73 +279,56 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-#Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)
 
 
 
-
-## ------------------- Buckling Analysis | Shear Buckling ------------------- ##
-
+## ------------------- Buckling Analysis | Web Buckling ------------------- ##
 
 
 
 tf = float(input("Enter the thickness of the front spar [mm]: "))*(10**-3)
 tr = float(input("Enter the thickness of the rear spar [mm]: "))*(10**-3)
 tm = float(input("Enter the thickness of the mid spar [mm]: "))*(10**-3)
-tsk = float(input("Enter the thickness of the skin [mm]: ")) * (10 ** -3)
+tsk = float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
 nr = int(input("Enter the amount of ribs: "))
 
-## need to calculate three kinds of shear stress;
-## critical tau - material & geometry dependent (pi^2KsE/12(1-poisson^2))*(t/b)^2
-## avg and torsion tau - due to loading
-
-## In formula in literature, b is used. Here I use h as not to confuse b for span.
 a = (b/2)/nr ## assuming equal spacing
 
-kslst = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
-a_hlst = [1, 1.2, 1.5, 1.7, 2, 2.5, 3, 3.5]
+kslst_web = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
+a_hlst_web = [1, 1.2, 1.5, 1.7, 2, 2.5, 3, 3.5]
 
-interpolation_function = sp.interpolate.interp1d(a_hlst, kslst, kind = 'cubic', fill_value = 'extrapolate')
-a_h_interp = np.linspace(1, 3.5, 251)
-ks_interp = interpolation_function(a_h_interp)
+interpolation_function_web = sp.interpolate.interp1d(a_hlst_web, kslst_web, kind = 'cubic', fill_value = 'extrapolate')
+a_h_interp_web = np.linspace(1, 3.5, 251)
+ks_interp_web = interpolation_function_web(a_h_interp_web)
 
-distr_ks = []
-
-tolerance = 1e-10
-def tau_cr(t, y):
+distr_ks_web = []
+def webbuckling_crit(t, y):
+    tolerance = 1e-10
     h = 0.1082 * chord(y)
     
     current_a_h = round(a/h,2)
-    index_match = np.where(np.abs(a_h_interp - current_a_h) < tolerance)[0]
+    index_match = np.where(np.abs(a_h_interp_web - current_a_h) < tolerance)[0]
     if index_match.size > 0 and current_a_h < 3.5:
-        ks = float(ks_interp[index_match[0]])
-        distr_ks.append(ks)
+        ks = float(ks_interp_web[index_match[0]])
+        distr_ks_web.append(ks)
     else:
         ks = 9.6
-        distr_ks.append(ks)
+        distr_ks_web.append(ks)
     return ((E*ks*np.pi**2)/(12*(1 - poisson**2)))*(t/h)**2
 
-def tau_avg(shear, tf, tm, tr, y):
-    h = chord(y) * 0.1082
-    
+def webbuckling_avg(shear, y):
+    h = 0.1082 * chord(y) 
     return shear/((tf + tm + tr)*h)
 
-## since the wingbox is a multicell box, things get a bit more complex 
-
-def tau_T(torque, tf, tm, tr, tsk, y):
-    ## solving multiple eqs using arrays 
-    ## matr_A*[qF, qR, dTheta/dZ] = matr_B 
+def webbuckling_torque(torque, y):
     wf = (chord(y)/2) - tf - (tm/2)
     wr = (chord(y)/2) - tr - (tm/2)
-    
     Af = chord(y)*t_c*wf
     Ar = chord(y)*t_c*wr
     
     matr_A = np.array([[(chord(y)/2)/(Af*tsk*G) + (chord(y)*t_c)/(2*Af*tf*G) + (chord(y)*t_c)/(2*Af*tm*G), -(chord(y)*t_c)/(2*Af*tm*G), -1], 
-    [-(chord(y)*t_c)/(2*Ar*tm*G), (chord(y)/2)/(Ar*tsk*G) + (chord(y)*t_c)/(2*Ar*tr*G) + (chord(y)*t_c)/(2*Ar*tm*G), -1], 
-    [2*Af, 2*Ar, 0]])
+    [-(chord(y)*t_c)/(2*Ar*tm*G), (chord(y)/2)/(Ar*tsk*G) + (chord(y)*t_c)/(2*Ar*tr*G) + (chord(y)*t_c)/(2*Ar*tm*G), -1], [2*Af, 2*Ar, 0]])
     matr_B= np.array([0, 0, torque])
-    
     matr_C = np.linalg.solve(matr_A, matr_B)
     
     tau_F = matr_C[0]/tf
@@ -333,30 +336,24 @@ def tau_T(torque, tf, tm, tr, tsk, y):
     tau_M = (matr_C[0] + matr_C[1])/tm
     return tau_F, tau_M, tau_R
 
-# next up: find vals for critical tau (integrate?? or use step size of sheardist array)
-# check if tau_T function works 
-# find vals for tau_max (which is kv*tau_avg,max + tau_T,max)
-# also figure out what to do for kv -> gonna be 2, due to time constraints
-
 tau_cr_f = []
 tau_cr_m = []
 tau_cr_r = []
-
-tau_ave = []
+tau_avg = []
 tau_torque_f = []
 tau_torque_m = []
 tau_torque_r = []
 
 i = 0
 for value in yvalues:
-    tau_cr_f.append(tau_cr(tf, value))
-    tau_cr_m.append(tau_cr(tm, value))
-    tau_cr_r.append(tau_cr(tr, value))
+    tau_cr_f.append(webbuckling_crit(tf, value))
+    tau_cr_m.append(webbuckling_crit(tm, value))
+    tau_cr_r.append(webbuckling_crit(tr, value))
     
-    tau_ave.append(tau_avg(sheardist[i], tf, tm, tr, value))
-    tau_torque_f.append(tau_T(total_torque[i], tf, tm, tf, tsk, value)[0])
-    tau_torque_m.append(tau_T(total_torque[i], tf, tm, tr, tsk, value)[1])
-    tau_torque_r.append(tau_T(total_torque[i], tf, tm, tr, tsk, value)[2])
+    tau_avg.append(webbuckling_avg(sheardist[i], value))
+    tau_torque_f.append(webbuckling_torque(total_torque[i], value)[0])
+    tau_torque_m.append(webbuckling_torque(total_torque[i], value)[1])
+    tau_torque_r.append(webbuckling_torque(total_torque[i], value)[2])
     
     i += 1 
 
@@ -367,24 +364,14 @@ for value in yvalues:
 
 
 
+kclst_skin = [15, 12, 10.7, 8.6, 8, 7.8, 7.4, 7.3, 7.2]
+a_hlst_skin = [0.7, 0.8, 0.9, 1.5, 2, 2.5, 3, 3.5, 4]
 
-tsk = float(input("Enter the skin thickness [mm]: ")) * (10 ** -3)
-nr = int(input("Enter the amount of ribs: "))
-strnr = int(input("Enter the amount of L-type stringers: "))
-tstr = int(input("Enter the thickness of the stringers [mm]: ")) * (10 ** -3)
-strfl = int(input("Enter the length of the stringer flanges [mm]: ")) * (10 ** -3)
+interpolation_function_skin = sp.interpolate.interp1d(a_hlst_skin, kclst_skin, kind='cubic', fill_value='extrapolate')
+a_h_interp_skin = np.linspace(0.7, 4, 331)
+ks_interp_skin = interpolation_function_skin(a_h_interp_skin)
 
-## In formula in literature, b is used. Here a is used as not to confuse b for span.
-a = (b / 2) / nr  ## assuming equal spacing
-
-kclst = [15, 12, 10.7, 8.6, 8, 7.8, 7.4, 7.3, 7.2]
-a_hlst_kc = [0.7, 0.8, 0.9, 1.5, 2, 2.5, 3, 3.5, 4]
-
-interpolation_function = sp.interpolate.interp1d(a_hlst_kc, kclst, kind='cubic', fill_value='extrapolate')
-a_h_interp = np.linspace(0.7, 4, 331)
-ks_interp = interpolation_function(a_h_interp)
-distr_kc = []
-tolerance = 1e-10
+distr_kc_skin = []
 
 def sigma_cr(t, y):
     h = chord(y) * 0.5
@@ -417,14 +404,14 @@ def sigma(moment, tsk, y):
 momentlst = momentdistribution(yvalues)
 sigma_cr_lst = []
 sigma_lst = []
-safetyfactor = []
+margin_of_safety_skin = []
 
 for i in range(3350):
     moment_span_location = -1*momentlst[i]
     sigma_cr_lst.append(sigma_cr(tsk, i/100))
     sigma_lst.append(sigma(moment_span_location, tsk, i/100))
     print(sigma(moment_span_location, tsk, i/100)/sigma_cr(tsk, i/100))
-    safetyfactor.append(sigma(moment_span_location, tsk, i/100)/sigma_cr(tsk, i/100))
+    margin_of_safety_skin.append(sigma(moment_span_location, tsk, i/100)/sigma_cr(tsk, i/100))
 
 
 
