@@ -7,7 +7,7 @@ from delflection import momentfunction
 K = 4                                           # Clamped on both ends
 E = 68.9E9                                      # Pa     
 # L = float(input("Enter rib spacing: "))       # m  
-y = 0 # float(input("Enter spanwise position: "))   # m
+y = 1.2 # float(input("Enter spanwise position: "))   # m
 M = momentfunction(y)                           # Nm  
 
 A = 0.001875             #float(input("Cross-sectional area of the stringer (m^2): "))
@@ -75,12 +75,12 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     h_moi = np.zeros(n_spar - 1)
     if n_spar > 2:
         for i in range(n_spar - 2):
-            l_spar1[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
-            x_spar1[i] = c * i * 0.5 / (n_spar - 1)     
-            z_spar1[i] = (c * (i * m_down * 0.5 /(n_spar - 1))) + (l_spar1[i]) * 0.5
+            l_spar1[i] = c * ((0.0665 - ((i + 1) * m_up * 0.5 /(n_spar - 1))) + (0.0417 - ((i + 1) * m_down * 0.5 /(n_spar - 1))))
+            x_spar1[i] = c * (i+1) * 0.5 / (n_spar - 1)     
+            z_spar1[i] = (c * ((i + 1) * m_down * 0.5 /(n_spar - 1))) + (l_spar1[i]) * 0.5
             t_spar[i] = t
             l_moi[i] = t
-            h_moi[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
+            h_moi[i] = c * ((0.0665 - ((i + 1) * m_up * 0.5 /(n_spar - 1))) + (0.0417 - ((i + 1) * m_down * 0.5 /(n_spar - 1))))
 
     # Centroids and areas
     x_centroid = np.array([0, 0.5 * c, 0.5 * c, 0.5 * c * 0.5])
@@ -123,6 +123,7 @@ def columnbuckling_stringer(a, b, t, L):
 def bendingstress_stringer(y, z):
     return (-M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)[0]
 
+print(bendingstress_stringer(y,z_down))
 
 def margin_of_safety_column(L):
     global y, length, width, thickness, z_down
@@ -139,8 +140,7 @@ for rib_space in np.arange(0.25, 33.5, 0.1):
     else:
         continue
 
-
-
+'''
 #--------------------------------------------------------------
 #only works if M and Ixx vary. Otherwise it will be straight line 
 yvalues = np.arange(0, 33.5, 0.01)
@@ -228,5 +228,4 @@ plt.xlabel("span")
 plt.ylabel("margin of safety tension")
 #plt.title("q")
 plt.show()
-
 '''
