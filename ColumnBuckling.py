@@ -1,14 +1,14 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from delflection import momentfunction
+from Moment import momentone
 
 # Input Variables
 K = 4                                           # Clamped on both ends
 E = 68.9E9                                      # Pa     
 # L = float(input("Enter rib spacing: "))       # m  
 y = 1.2 # float(input("Enter spanwise position: "))   # m
-M = momentfunction(y)                           # Nm  
+M = momentone(y)                           # Nm  
 
 A = 0.001875             #float(input("Cross-sectional area of the stringer (m^2): "))
 length =  0.06           #float(input("Length of the stringer (mm): ")) / 1000
@@ -112,18 +112,19 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.03, 0.04, 0.04, 0.002, 24, y)
+Ixx, z_down, z_up = calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.001875, 18, y)
 
 
 def columnbuckling_stringer(a, b, t, L):
     global K, E, A
     return (K * (np.pi**2) * E * momentofinertia_xx_stringer(a, b, t)) / (L**2 * A)
 
+print('The critical buckling stress is: ',columnbuckling_stringer(length, width, thickness, 1.65) )
 
 def bendingstress_stringer(y, z):
-    return (-M * z) / calculate_moment_of_inertia(3, 0.03, 0.04, 0.04, 0.002, 24, y)[0]
+    return (-M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.0001875, 18, y)[0]
 
-print(bendingstress_stringer(y,z_down))
+print('The buckling stress is : ', bendingstress_stringer(y,z_up))
 
 def margin_of_safety_column(L):
     global y, length, width, thickness, z_down

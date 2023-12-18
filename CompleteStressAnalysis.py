@@ -251,12 +251,12 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
     h_moi = np.zeros(n_spar - 1)
     if n_spar > 2:
         for i in range(n_spar - 2):
-            l_spar1[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
-            x_spar1[i] = c * i * 0.5 / (n_spar - 1)     
-            z_spar1[i] = (c * (i * m_down * 0.5 /(n_spar - 1))) + (l_spar1[i]) * 0.5
+            l_spar1[i] = c * ((0.0665 - ((i + 1) * m_up * 0.5 /(n_spar - 1))) + (0.0417 - ((i + 1) * m_down * 0.5 /(n_spar - 1))))
+            x_spar1[i] = c * (i + 1) * 0.5 / (n_spar - 1)     
+            z_spar1[i] = (c * ((i + 1) * m_down * 0.5 /(n_spar - 1))) + (l_spar1[i]) * 0.5
             t_spar[i] = t
             l_moi[i] = t
-            h_moi[i] = c * ((0.0665 - (i * m_up * 0.5 /(n_spar - 1))) + (0.0417 - (i * m_down * 0.5 /(n_spar - 1))))
+            h_moi[i] = c * ((0.0665 - ((i + 1) * m_up * 0.5 /(n_spar - 1))) + (0.0417 - ((i + 1) * m_down * 0.5 /(n_spar - 1))))
 
     # Centroids and areas
     x_centroid = np.array([0, 0.5 * c, 0.5 * c, 0.5 * c * 0.5])
@@ -280,8 +280,8 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
         I_x[i] = (l_x[i] * h_x[i]**3 / 12) + (l_parts[i] * t_parts[i]) * ((z_centroids[i] - centroid_z)**2)
 
     # Stringer contributions
-    z_str1 = f_spar - ((0.0665 - 0.0450) * c * 0.5)
-    z_str2 = (0.0417 - 0.0218) * c * 0.5
+    z_str1 = f_spar #- ((0.0665 - 0.0450) * c * 0.5)
+    z_str2 = 0 #(0.0417 - 0.0218) * c * 0.5
     for i in range(n_str1):
         I_x = np.append(I_x, A1 * ((z_str1 - centroid_z)**2))
         I_x = np.append(I_x, A1 * ((z_str2 - centroid_z)**2))
