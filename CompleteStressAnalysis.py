@@ -6,12 +6,12 @@ import numpy as np
 
 # Critical Loading Conditions
 v = 258.9704
-n = 2.5
+n = 1.5
 
 rho = 1.225
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-safetyfactor = 1.2
+safetyfactor = 1.5
 b = 67 
 Ww = 38229.5 / 2 
 Wf = (125407 + 522.9) / 2 
@@ -41,7 +41,7 @@ poisson = 0.33
 t_c = 0.113
 k_v = 2
 sigmayield_tens = 276 * 10 ** 6
-sigmayield_comp = -241 * 10 ** 6
+sigmayield_comp = -276 * 10 ** 6
 
 # Stringer Properties
 A = 0.001875             #float(input("Cross-sectional area of the stringer (m^2): "))
@@ -180,11 +180,11 @@ def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= halfspan:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav 
     for i in range(len(yvalues)):
-        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+        if yvalues[i] >= 5.8 and yvalues[i] <= halfspan:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav 
     return sheardistributionlst
 
 def y_shear(y, S):
@@ -195,11 +195,11 @@ def momentdistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= halfspan:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav 
     for i in range(len(yvalues)):
-        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+        if yvalues[i] >= 5.8 and yvalues[i] <= halfspan:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav 
     sheardistributionlst = np.flip(sheardistributionlst)
     moment = integrate.cumtrapz(sheardistributionlst, y, initial=0)
     momentdistributionlst = -1 * np.flip(moment)
@@ -308,7 +308,6 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-print(calculate_moment_of_inertia(3, 0.03, 0.03, 0.03, 0.001875, 18, 23.1))
 
 ## ------------------- Buckling Analysis | Web Buckling ------------------- ##
 
@@ -325,6 +324,7 @@ y_value = float(input("Enter spanwise position: "))
 ribspacing = float(input("Enter rib spacing: "))
 z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[1]
 z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2]
+
 
 
 a = ribspacing ## assuming equal spacing
@@ -428,6 +428,7 @@ def skinbuckling_crit(t, y):
 
 def skinbuckling_bendingstress(y, z):
     return (-momentfunction(y) * z) / calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y)[0]
+
 
 momentlst = momentdistribution(yvalues)
 sigma_cr_lst = []

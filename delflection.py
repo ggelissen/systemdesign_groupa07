@@ -8,8 +8,8 @@ rho = 1.225
 v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-n = 2.5
-sf = 1.2
+n = 1.5
+sf = 1.5
 b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
@@ -155,11 +155,11 @@ def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear) 
     for i in range(len(yvalues)):
-        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= b/2:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav 
     for i in range(len(yvalues)):
-        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+        if yvalues[i] >= 5.8 and yvalues[i] <= b/2:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav 
     return sheardistributionlst
 
 
@@ -167,11 +167,11 @@ def momentdistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0) 
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= b/2:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav 
     for i in range(len(yvalues)):
-        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
-            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+        if yvalues[i] >= 5.8 and yvalues[i] <= b/2:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav 
     moment = integrate.cumtrapz(shear, yvalues, initial=0)
     momentdistributionlst = -1 * np.flip(moment)
     return momentdistributionlst
@@ -270,7 +270,7 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-print(calculate_moment_of_inertia(3, 0.03, 0.03, 0.03, 0.001875, 18, 23.1))
+
 
 # Input values
 n_spar = int(input('Enter the number of spars: '))
