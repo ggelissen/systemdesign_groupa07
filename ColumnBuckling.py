@@ -7,8 +7,8 @@ from Moment import momentone
 K = 4                                           # Clamped on both ends
 E = 68.9E9                                      # Pa     
 # L = float(input("Enter rib spacing: "))       # m  
-y = 1.2 # float(input("Enter spanwise position: "))   # m
-M = momentone(y)                           # Nm  
+y = 0 # float(input("Enter spanwise position: "))   # m
+M = momentone(y)[0]                           # Nm  
 
 A = 0.001875             #float(input("Cross-sectional area of the stringer (m^2): "))
 length =  0.06           #float(input("Length of the stringer (mm): ")) / 1000
@@ -122,14 +122,14 @@ def columnbuckling_stringer(a, b, t, L):
 print('The critical buckling stress is: ',columnbuckling_stringer(length, width, thickness, 1.65) )
 
 def bendingstress_stringer(y, z):
-    return (-M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.0001875, 18, y)[0]
+    return (-M * z) / calculate_moment_of_inertia(3, 0.025, 0.025, 0.025, 0.0001875, 20, y)[0]
 
 print('The buckling stress is : ', bendingstress_stringer(y,z_up))
 
 def margin_of_safety_column(L):
     global y, length, width, thickness, z_down
     return columnbuckling_stringer(length, width, thickness, L) / bendingstress_stringer(y, z_down)
-
+'''
 # Iterate over rib spacing to find optimal value
 for rib_space in np.arange(0.25, 33.5, 0.1):
     if margin_of_safety_column(rib_space) < 1:
@@ -140,7 +140,7 @@ for rib_space in np.arange(0.25, 33.5, 0.1):
             break
     else:
         continue
-
+'''
 '''
 #--------------------------------------------------------------
 #only works if M and Ixx vary. Otherwise it will be straight line 

@@ -23,7 +23,7 @@ S = 574.3 #m^2
 sweep_LE = 37.12 #deg
 cr = 13.4 #m 
 
-sf = 1.5 # safety factor
+sf = 1.25 # safety factor
 
 CL0 = 0.04647
 CL10 = 0.97586
