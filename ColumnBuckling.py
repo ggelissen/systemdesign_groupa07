@@ -122,7 +122,7 @@ def columnbuckling_stringer(a, b, t, L):
 print('The critical buckling stress is: ',columnbuckling_stringer(length, width, thickness, 1.65) )
 
 def bendingstress_stringer(y, z):
-    return (-M * z) / calculate_moment_of_inertia(3, 0.025, 0.025, 0.025, 0.0001875, 20, y)[0]
+    return (-M * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.0001875, 18, y)[0]
 
 print('The buckling stress is : ', bendingstress_stringer(y,z_up))
 
