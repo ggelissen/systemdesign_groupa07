@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
-rho = 0.324438
+rho = 0.33
 v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
@@ -158,10 +158,10 @@ def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] == (b / 2) * 0.35:
+        if yvalues[i] <= (b / 2) * 0.35:
             sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
     for i in range(len(yvalues)):
-        if yvalues[i] == 5.8:
+        if yvalues[i] <= 5.8:
             sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
     return sheardistributionlst
 

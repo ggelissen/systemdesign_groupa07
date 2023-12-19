@@ -11,7 +11,7 @@ n = 2.5
 rho = 1.225
 q = 0.5*rho*(v**2)
 halfspan = 33.5
-safetyfactor = 1.5
+safetyfactor = 1.2
 b = 67 
 Ww = 38229.5 / 2 
 Wf = (125407 + 522.9) / 2 
@@ -136,29 +136,25 @@ def closest(lst, val):
     return lst[idx]
 
 # functions to define all loading distribution (ie decreasing triangular shape for dry, const for fuel)
+
 def cts_loaddistr(y):
-    if y == 0:
-        f = g = 0
-    if y != 0:
+    f=0
+    g=0
+    #if y == 0:
+    #   f = g = 0
+    if y >= 0:
         c = 4 * Ww * grav / b
         a = (-1 * (Ww * grav * 8)) / (b ** 2)
         f = a * y + c
-    if y <= b / 4 and y > 0:
+    if y <= b / 4 and y >= 0:
         h = 8 * Wf * (1 - 1/2.56) * grav / b
         d = 8 * Wf * grav / (2.56 * b)
         m = (d - h) / (b / 4)
         g = h + m * y
     if y > b / 4:
         g = 0
-    if y == 5.8:
-        l = Wlg * grav
-    else:
-        l = 0
-    if y == 12:
-        e = Weng * grav
-    else:
-        e = 0
-    return f + g + e + l #f is structural weight, g is fuel weight
+    return f + g  #f is structural weight, g is fuel weight
+
 
 # Angle of Attack
 alpha_sin = (CLD-CL0)/(CL10-CL0) * np.sin(10*np.pi/180)
@@ -177,11 +173,18 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element)*n)) - cts_loaddistr(element)) * safetyfactor)
+    liftdistributionlst = np.append(liftdistributionlst, ((LdistributionD(element)) - cts_loaddistr(element)) * n * safetyfactor)
+liftdistributionlst = np.flip(liftdistributionlst)    
 
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
+    for i in range(len(yvalues)):
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+    for i in range(len(yvalues)):
+        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
     return sheardistributionlst
 
 def y_shear(y, S):
@@ -190,9 +193,18 @@ shearfunction = y_shear(yvalues, sheardistribution(yvalues))
 
 def momentdistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
-    moment = integrate.cumtrapz(shear, yvalues, initial=0)
+    sheardistributionlst = np.flip(shear)
+    for i in range(len(yvalues)):
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+    for i in range(len(yvalues)):
+        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+    sheardistributionlst = np.flip(sheardistributionlst)
+    moment = integrate.cumtrapz(sheardistributionlst, y, initial=0)
     momentdistributionlst = -1 * np.flip(moment)
     return momentdistributionlst
+
 
 def y_moment(y, M):
     return sp.interpolate.interp1d(y, M, kind='cubic', fill_value="extrapolate")
@@ -204,6 +216,12 @@ def chord(y):
 sheardist = sheardistribution(yvalues)
 sheardist[0] = 0
 
+momentdist = momentdistribution(yvalues)
+'''
+def momentone(y):
+    i=np.where(yvalues == y)[0]
+    return momentdist[i]
+'''
 Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
 Tt = T*h*np.cos(sweep_LE*d2r)
 
@@ -290,23 +308,26 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
-
-
+print(calculate_moment_of_inertia(3, 0.03, 0.03, 0.03, 0.001875, 18, 23.1))
 
 ## ------------------- Buckling Analysis | Web Buckling ------------------- ##
 
 
+tf = 0.03 #float(input("Enter the thickness of the spar [mm]: "))*(10**-3)
+tr = tf
+tm = tf
+tsk = 0.03 #float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
+#nr = int(input("Enter the amount of ribs: "))
+ns = 3 #int(input("Enter the amount of spars: "))
+stringerarea = 0.001875 # float(input("Enter the cross-sectional area of the stringer [m^2]: "))
+stringernumber = 18 #int(input("Enter the number of stringers [#]: "))
+y_value = float(input("Enter spanwise position: "))
+ribspacing = float(input("Enter rib spacing: "))
+z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[1]
+z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2]
 
-tf = float(input("Enter the thickness of the front spar [mm]: "))*(10**-3)
-tr = float(input("Enter the thickness of the rear spar [mm]: "))*(10**-3)
-tm = float(input("Enter the thickness of the mid spar [mm]: "))*(10**-3)
-tsk = float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
-nr = int(input("Enter the amount of ribs: "))
-ns = int(input("Enter the amount of spars: "))
-stringerarea = float(input("Enter the cross-sectional area of the stringer [m^2]: "))
-stringernumber = int(input("Enter the number of stringers [#]: "))
 
-a = (b/2)/nr ## assuming equal spacing
+a = ribspacing ## assuming equal spacing
 
 kslst_web = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
 a_hlst_web = [1, 1.2, 1.5, 1.7, 2, 2.5, 3, 3.5]
@@ -399,7 +420,7 @@ def skinbuckling_crit(t, y):
         distr_kc_skin.append(kc)
     else:
         kc = 7.2
-        distr_kc_skin.append(ks)
+        distr_kc_skin.append(kc)
     if a <= h:  
         return ((E * 7 * np.pi ** 2) / (12 * (1 - poisson ** 2))) * (t / a) ** 2
     elif h < a:  
@@ -457,7 +478,7 @@ def columnbuckling_crit(a, b, t, L):
     return (K * (np.pi**2) * E * momentofinertia_xx_stringer(a, b, t)) / (L**2 * A)
 
 def columnbuckling_bendingstress(y, z):
-    return (-momentfunction(y) * z) / calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y)[0]
+    return (-momentfunction(y)* z) / calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y)[0]
 
 def margin_of_safety_column(y, z, L):
     global length, width, thickness
@@ -475,7 +496,7 @@ stress_down = []
 yield_stress_tension = []
 yield_stress_compress = []
 
-load_factor = float(input("Load Factor: "))
+#load_factor = float(input("Load Factor: "))
 
 def compressiontension_crit(y, z_comp, z_tens):
     for i in range(len(y)):
@@ -526,10 +547,6 @@ for i in range(len(tension_stress)):
 
 ## ------------------- Printing Statements ------------------- ##
 
-y_value = float(input("Enter spanwise position: "))
-ribspacing = float(input("Enter rib spacing: "))
-z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[1]
-z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2]
 
 # Web Buckling
 print("\n Web Buckling")

@@ -4,12 +4,12 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 import numpy as np
 
-rho = 1.225 #0.324438
-v = 242.958
+rho = 1.225
+v = 258.9704
 q = 0.5*rho*(v**2)
 halfspan = 33.5
 n = 2.5
-sf = 1.5
+sf = 1.2
 b = 67  # m
 Ww = 38229.5 / 2  # kg
 Wf = (125407 + 522.9) / 2  # kg
@@ -114,28 +114,22 @@ for element in yvalues:
         engload.append(Weng * grav)
 '''
 def cts_loaddistr(y):
-    if y == 0:
-        f = g = 0
-    if y != 0:
+    f=0
+    g=0
+    #if y == 0:
+    #   f = g = 0
+    if y >= 0:
         c = 4 * Ww * grav / b
         a = (-1 * (Ww * grav * 8)) / (b ** 2)
         f = a * y + c
-    if y <= b / 4 and y > 0:
+    if y <= b / 4 and y >= 0:
         h = 8 * Wf * (1 - 1/2.56) * grav / b
         d = 8 * Wf * grav / (2.56 * b)
         m = (d - h) / (b / 4)
         g = h + m * y
     if y > b / 4:
         g = 0
-    if y == 5.8:
-        l = Wlg * grav 
-    else: 
-        l = 0
-    if y == 12:
-        e = Weng * grav
-    else:
-        e = 0
-    return f + g + e + l #f is structural weight, g is fuel weight
+    return f + g  #f is structural weight, g is fuel weight
 
 # Angle of Attack
 alpha_sin = (CLD-CL0)/(CL10-CL0) * np.sin(10*np.pi/180)
@@ -154,16 +148,30 @@ def LdistributionD(x):
     return (Ldistribution0(x) + ((CLD - CL0)/(CL10 - CL0)) * (Ldistribution10(x) - Ldistribution0(x))) * np.cos(alpha)
 liftdistributionlst = np.array([])
 for element in yvalues:
-    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element))) - cts_loaddistr(element)) * sf * n)
+    liftdistributionlst = np.append(liftdistributionlst, (((LdistributionD(element))) - cts_loaddistr(element))* n * sf)
 
 
 def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
-    sheardistributionlst = np.flip(shear)
+    sheardistributionlst = np.flip(shear) 
+    for i in range(len(yvalues)):
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+    for i in range(len(yvalues)):
+        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
     return sheardistributionlst
 
+
 def momentdistribution(y):
-    shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
+    shear = integrate.cumtrapz(liftdistributionlst, y, initial=0) 
+    sheardistributionlst = np.flip(shear)
+    for i in range(len(yvalues)):
+        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+    for i in range(len(yvalues)):
+        if yvalues[i] >= 5.8 and yvalues[i] <= 33.5:
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
     moment = integrate.cumtrapz(shear, yvalues, initial=0)
     momentdistributionlst = -1 * np.flip(moment)
     return momentdistributionlst
@@ -262,6 +270,8 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
     return np.sum(I_x), centroid_z, (f_spar - centroid_z)
 
+print(calculate_moment_of_inertia(3, 0.03, 0.03, 0.03, 0.001875, 18, 23.1))
+
 # Input values
 n_spar = int(input('Enter the number of spars: '))
 t_1 = float(input('Enter the spar thickness: '))
@@ -348,3 +358,4 @@ def bendingstress_stringer(y):
 
 plt.plot(yvalues, bendingstress_stringer(yvalues))
 plt.show()
+
