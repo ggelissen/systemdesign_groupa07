@@ -40,6 +40,8 @@ G = 26 * 10 ** 9
 poisson = 0.33
 t_c = 0.113
 k_v = 2
+sigmayield_tens = 276 * 10 ** 6
+sigmayield_comp = -241 * 10 ** 6
 
 # Stringer Properties
 A = 0.001875             #float(input("Cross-sectional area of the stringer (m^2): "))
@@ -450,16 +452,16 @@ def momentofinertia_xz_stringer(a, b, t):
     I2 = (a - t) * t * (centroid_x_stringer(a, b, t) - t / 2) * -1 * (centroid_z_stringer(a, b, t) - (a + t) / 2)
     return I1 + I2
 
-def columnbuckling_stringer(a, b, t, L):
+def columnbuckling_crit(a, b, t, L):
     global K, E, A
     return (K * (np.pi**2) * E * momentofinertia_xx_stringer(a, b, t)) / (L**2 * A)
 
-def bendingstress_stringer(y, z):
-    return (-momentfunction(y) * z) / calculate_moment_of_inertia(3, 0.02, 0.025, 0.025, 0.002, 18, y)[0]
+def columnbuckling_bendingstress(y, z):
+    return (-momentfunction(y) * z) / calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y)[0]
 
-def margin_of_safety_column(L):
-    global y, length, width, thickness, z_down
-    return columnbuckling_stringer(length, width, thickness, L) / bendingstress_stringer(y, z_down)
+def margin_of_safety_column(y, z, L):
+    global length, width, thickness
+    return columnbuckling_crit(length, width, thickness, L) / columnbuckling_bendingstress(y, z)
 
 
 
@@ -468,45 +470,44 @@ def margin_of_safety_column(L):
 
 
 
-#only works if M and Ixx vary. Otherwise it will be straight line 
-yvalues = np.arange(0, 33.5, 0.01)
-
 stress_up = []
 stress_down = []
 yield_stress_tension = []
 yield_stress_compress = []
 
 load_factor = float(input("Load Factor: "))
-moment=[]
-for i in range(len(yvalues)):
-    #moment.append(momentfunction(yvalues[i]))
-    #moment=momentdistribution(yvalues)
-    stress_up.append(bendingstress_stringer(z_up))
-    stress_down.append(bendingstress_stringer(z_down))
-    yield_stress_tension.append(276000000)
-    yield_stress_compress.append(-241000000)
-stress_up = np.array(stress_up[:-1])
-stress_down = np.array(stress_down[:-1]) * -1
-yield_stress_compress = np.array(yield_stress_compress[:-1])
-yield_stress_tension = np.array(yield_stress_tension[:-1])
-stress_up = stress_up * load_factor
-stress_down = stress_down * load_factor
 
-if load_factor>=0:
-   compressive_stress = stress_up
-   tension_stress = stress_down
-   margin_of_safety_compressive = yield_stress_compress / stress_up
-   #i_for_compress = np.argmax(margin_of_safety_compressive > 2)
-   margin_of_safety_tensional = yield_stress_tension / stress_down
-   #i_for_tension = np.argmax(margin_of_safety_tensional > 2)
-else:
-   compressive_stress = stress_down
-   tension_stress = stress_up
-   margin_of_safety_compressive = yield_stress_compress / stress_down
-   #i_for_compress = np.argmax(margin_of_safety_compressive > 2)
-   margin_of_safety_tensional = yield_stress_tension / stress_up
-   #i_for_tension = np.argmax(margin_of_safety_tensional > 2)
+def compressiontension_crit(y, z_comp, z_tens)
+    for i in range(len(y)):
+        stress_up.append(columnbuckling_bendingstress(z_comp))
+        stress_down.append(columnbuckling_bendingstress(z_tens))
+        yield_stress_tension.append(sigmayield_tens)
+        yield_stress_compress.append(sigmayield_comp)
+    stress_up = np.array(stress_up[:-1])
+    stress_down = np.array(stress_down[:-1]) * -1
+    yield_stress_compress = np.array(yield_stress_compress[:-1])
+    yield_stress_tension = np.array(yield_stress_tension[:-1])
+    stress_up = stress_up * load_factor
+    stress_down = stress_down * load_factor
 
+    if load_factor>=0:
+        compressive_stress = stress_up
+        tension_stress = stress_down
+        margin_of_safety_compressive = yield_stress_compress / stress_up
+        #i_for_compress = np.argmax(margin_of_safety_compressive > 2)
+        margin_of_safety_tensional = yield_stress_tension / stress_down
+        #i_for_tension = np.argmax(margin_of_safety_tensional > 2)
+    else:
+        compressive_stress = stress_down
+        tension_stress = stress_up
+        margin_of_safety_compressive = yield_stress_compress / stress_down
+        #i_for_compress = np.argmax(margin_of_safety_compressive > 2)
+        margin_of_safety_tensional = yield_stress_tension / stress_up
+        #i_for_tension = np.argmax(margin_of_safety_tensional > 2)
+
+    return compressive_stress, tension_stress
+
+'''
 #check the value
 found_compress = False
 for i in range(len(compressive_stress)):
@@ -520,12 +521,15 @@ for i in range(len(tension_stress)):
         print(f"Value larger than 267000000 found in tension")
         found_tension = True
         break
-
+'''
 
 
 ## ------------------- Printing Statements ------------------- ##
 
 y_value = float(input("Enter spanwise position: "))
+ribspacing = float(input("Enter rib spacing: "))
+z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, yvalues)[1]
+z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, yvalues)[2]
 
 # Web Buckling
 print("Web Buckling")
@@ -535,4 +539,19 @@ print(f"True stress: {webbuckling_avg(shearfunction(y_value), y_value) * k_v + w
 # Skin Buckling
 print("Skin Buckling")
 print(f"Critical stress: {skinbuckling_crit(tsk, y_value)}")
-print(f"True stress: {skinbuckling_bendingstress(y_value, calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2])}")
+print(f"True stress: {skinbuckling_bendingstress(y_value, z_up)}")
+
+# Column Buckling
+print("Column Buckling")
+print(f"Critical stress: {columnbuckling_crit(length, width, thickness, ribspacing)}")
+print(f"True stress: {columnbuckling_bendingstress(y_value, z_up)}")
+
+# Compression
+print("Compression")
+print(f"Critical stress: {sigmayield_comp}")
+print(f"True stress: {compressiontension_crit(y_value, z_up, z_down)[0]}")
+
+# Tension
+print("Tension")
+print(f"Critical stress: {sigmayield_tens}")
+print(f"True stress: {compressiontension_crit(y_value, z_up, z_down)[1]}")
