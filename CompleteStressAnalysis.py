@@ -477,7 +477,7 @@ yield_stress_compress = []
 
 load_factor = float(input("Load Factor: "))
 
-def compressiontension_crit(y, z_comp, z_tens)
+def compressiontension_crit(y, z_comp, z_tens):
     for i in range(len(y)):
         stress_up.append(columnbuckling_bendingstress(z_comp))
         stress_down.append(columnbuckling_bendingstress(z_tens))
@@ -528,30 +528,30 @@ for i in range(len(tension_stress)):
 
 y_value = float(input("Enter spanwise position: "))
 ribspacing = float(input("Enter rib spacing: "))
-z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, yvalues)[1]
-z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, yvalues)[2]
+z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[1]
+z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2]
 
 # Web Buckling
-print("Web Buckling")
-print(f"Critical stress: {webbuckling_crit(tf, y_value)}")
-print(f"True stress: {webbuckling_avg(shearfunction(y_value), y_value) * k_v + webbuckling_torque(torquefunction(y_value), y_value)[0]}")
+print("\n Web Buckling")
+print(f"Critical stress: {np.round(webbuckling_crit(tf, y_value))}")
+print(f"True stress: {np.round(webbuckling_avg(shearfunction(y_value), y_value) * k_v + webbuckling_torque(torquefunction(y_value), y_value)[0])}")
 
 # Skin Buckling
-print("Skin Buckling")
-print(f"Critical stress: {skinbuckling_crit(tsk, y_value)}")
-print(f"True stress: {skinbuckling_bendingstress(y_value, z_up)}")
+print("\n Skin Buckling")
+print(f"Critical stress: {np.round(skinbuckling_crit(tsk, y_value))}")
+print(f"True stress: {np.round(skinbuckling_bendingstress(y_value, z_up))}")
 
 # Column Buckling
-print("Column Buckling")
-print(f"Critical stress: {columnbuckling_crit(length, width, thickness, ribspacing)}")
-print(f"True stress: {columnbuckling_bendingstress(y_value, z_up)}")
+print("\n Column Buckling")
+print(f"Critical stress: {np.round(columnbuckling_crit(length, width, thickness, ribspacing))}")
+print(f"True stress: {np.round(columnbuckling_bendingstress(y_value, z_up))}")
 
 # Compression
-print("Compression")
+print("\n Compression")
 print(f"Critical stress: {sigmayield_comp}")
-print(f"True stress: {compressiontension_crit(y_value, z_up, z_down)[0]}")
+print(f"True stress: {np.round(columnbuckling_bendingstress(y_value, z_up))}")
 
 # Tension
-print("Tension")
+print("\n Tension")
 print(f"Critical stress: {sigmayield_tens}")
-print(f"True stress: {compressiontension_crit(y_value, z_up, z_down)[1]}")
+print(f"True stress: {np.round(columnbuckling_bendingstress(y_value, z_down))} \n")
