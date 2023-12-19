@@ -159,10 +159,10 @@ def sheardistribution(y):
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
         if yvalues[i] <= (b / 2) * 0.35:
-            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav
     for i in range(len(yvalues)):
         if yvalues[i] <= 5.8:
-            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav
     return sheardistributionlst
 
 def momentdistribution(y):
@@ -170,10 +170,10 @@ def momentdistribution(y):
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
         if yvalues[i] == (b / 2) * 0.35:
-            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav * (b / 2) * 0.35
+            sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav
     for i in range(len(yvalues)):
         if yvalues[i] == 5.8:
-            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav * 5.8
+            sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav
     sheardistributionlst = np.flip(sheardistributionlst)
     moment = integrate.cumtrapz(sheardistributionlst, y, initial=0)
     momentdistributionlst = -1 * np.flip(moment)
