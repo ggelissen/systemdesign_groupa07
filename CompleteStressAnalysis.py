@@ -324,8 +324,8 @@ tsk = 0.030 # float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
 stringerarea = 0.001875 # float(input("Enter the cross-sectional area of the stringer [m^2]: "))
 stringernumber = 18 # int(input("Enter the number of stringers [#]: "))
 
-y_value = 0 # float(input("Enter spanwise position: "))
-ribspacing = 1.2 # float(input("Enter rib spacing: "))
+y_value = 1.3 # float(input("Enter spanwise position: "))
+ribspacing = 1.3 # float(input("Enter rib spacing: "))
 
 z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[1]
 z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2]
@@ -532,19 +532,20 @@ plt.show()
 
 
 
-stress_up = []
-stress_down = []
-yield_stress_tension = []
-yield_stress_compress = []
-z_values_compress = []
-z_values_tension = []
-safetymarginlst_compress = []
-safetymarginlst_tension = []
-y_lst_compress = []
-y_lst_tension = []
 
 def compressiontension_crit(y):
-    global stress_up, stress_down, yield_stress_tension, yield_stress_compress, z_values_compress, z_values_tension
+    
+    stress_up = []
+    stress_down = []
+    yield_stress_tension = []
+    yield_stress_compress = []
+    z_values_compress = []
+    z_values_tension = []
+    safetymarginlst_compress = []
+    safetymarginlst_tension = []
+    y_lst_compress = []
+    y_lst_tension = []
+
     for i in range(len(y)):
         z_comp = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y[i])[2]
         stress_up.append(-columnbuckling_bendingstress(y[i], z_comp))
@@ -564,21 +565,16 @@ def compressiontension_crit(y):
         y_lst_tension.append(y[i])
         
         safetymarginlst_tension.append(yield_stress_tension[i] / stress_down[i])
-        if safetymarginlst_compress[i] < 1 or safetymarginlst_compress[i] > 10:
-            break
         if safetymarginlst_tension[i] < 1 or safetymarginlst_tension[i] > 10:
             break
 
-    stress_up = np.array(stress_up[:-1])
-    stress_down = np.array(stress_down[:-1]) * -1
-    yield_stress_compress = np.array(yield_stress_compress[:-1])
-    yield_stress_tension = np.array(yield_stress_tension[:-1])
+    return stress_up, stress_down, safetymarginlst_compress, safetymarginlst_tension, z_values_compress, z_values_tension, y_lst_compress, y_lst_tension
 
-    return stress_up, stress_down, safetymarginlst_compress, safetymarginlst_tension, z_values_compress, z_values_tension
+print(len(compressiontension_crit(yvalues)[0]))
 
-plt.plot(y_lst_compress[:-1], compressiontension_crit(yvalues)[2])
+plt.plot(compressiontension_crit(yvalues)[6][:-1], compressiontension_crit(yvalues)[2][:-1])
 plt.show()
-plt.plot(y_lst_compress[:-1], compressiontension_crit(yvalues)[3])
+plt.plot(compressiontension_crit(yvalues)[7][:-1], compressiontension_crit(yvalues)[3][:-1])
 plt.show()
 
 
