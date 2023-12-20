@@ -180,10 +180,10 @@ def sheardistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= halfspan:
+        if yvalues[i] <= (b / 2) * 0.35:
             sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav 
     for i in range(len(yvalues)):
-        if yvalues[i] >= 5.8 and yvalues[i] <= halfspan:
+        if yvalues[i] <= 5.8:
             sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav 
     return sheardistributionlst
 
@@ -195,10 +195,10 @@ def momentdistribution(y):
     shear = integrate.cumtrapz(liftdistributionlst, y, initial=0)
     sheardistributionlst = np.flip(shear)
     for i in range(len(yvalues)):
-        if yvalues[i] >= (b / 2) * 0.35 and yvalues[i] <= halfspan:
+        if yvalues[i] <= (b / 2) * 0.35:
             sheardistributionlst[i] = sheardistributionlst[i] - Weng * grav 
     for i in range(len(yvalues)):
-        if yvalues[i] >= 5.8 and yvalues[i] <= halfspan:
+        if yvalues[i] <= 5.8:
             sheardistributionlst[i] = sheardistributionlst[i] - 11383.7 / 2 * grav 
     sheardistributionlst = np.flip(sheardistributionlst)
     moment = integrate.cumtrapz(sheardistributionlst, y, initial=0)
@@ -241,6 +241,9 @@ total_torque = np.array(moment) + np.array(torque)
 def y_torque(y, T):
     return sp.interpolate.interp1d(y, T, kind='cubic', fill_value="extrapolate")
 torquefunction = y_torque(yvalues, total_torque)
+
+plt.plot(yvalues, momentfunction(yvalues))
+plt.show()
 
 
 
@@ -312,23 +315,22 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 ## ------------------- Buckling Analysis | Web Buckling ------------------- ##
 
 
-tf = 0.03 #float(input("Enter the thickness of the spar [mm]: "))*(10**-3)
-tr = tf
-tm = tf
-tsk = 0.03 #float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
-#nr = int(input("Enter the amount of ribs: "))
-ns = 3 #int(input("Enter the amount of spars: "))
+tf = 0.030 # float(input("Enter the thickness of the spar [mm]: "))*(10**-3)
+tr = tf # float(input("Enter the thickness of the rear spar [mm]: "))*(10**-3)
+tm = tf # float(input("Enter the thickness of the mid spar [mm]: "))*(10**-3)
+ns = 3 # int(input("Enter the amount of spars: "))
+
+tsk = 0.030 # float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
 stringerarea = 0.001875 # float(input("Enter the cross-sectional area of the stringer [m^2]: "))
-stringernumber = 18 #int(input("Enter the number of stringers [#]: "))
-y_value = float(input("Enter spanwise position: "))
-ribspacing = float(input("Enter rib spacing: "))
+stringernumber = 18 # int(input("Enter the number of stringers [#]: "))
+
+y_value = 0 # float(input("Enter spanwise position: "))
+ribspacing = 1.2 # float(input("Enter rib spacing: "))
+
 z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[1]
 z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2]
 
-
-
-a = ribspacing ## assuming equal spacing
-
+a = ribspacing
 kslst_web = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
 a_hlst_web = [1, 1.2, 1.5, 1.7, 2, 2.5, 3, 3.5]
 
@@ -485,6 +487,44 @@ def margin_of_safety_column(y, z, L):
     global length, width, thickness
     return columnbuckling_crit(length, width, thickness, L) / columnbuckling_bendingstress(y, z)
 
+safetymarginlst_column = []
+y_lst = []
+for i in yvalues:
+    if i <= 2.6:
+        L = 1.3
+    elif i <= 5.4:
+        L = 1.4
+    elif i <= 6.9:
+        L = 1.5
+    elif i <= 11.7:
+        L = 1.6
+    elif i <= 13.4:
+        L = 1.7
+    elif i <= 15.2:
+        L = 1.8
+    elif i <= 17.2:
+        L = 2.0
+    elif i <= 19.4:
+        L = 2.2
+    elif i <= 22.0:
+        L = 2.6
+    elif i <= 25.0:
+        L = 3.0
+    elif i <= 28.7:
+        L = 3.7
+    elif i <= 33.5:
+        L = 4.8
+    z_y = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, i)[1]
+    if margin_of_safety_column(i, z_y, L) < 1 or margin_of_safety_column(i, z_y, L) > 10:
+        break
+    y_lst.append(i)
+    safetymarginlst_column.append(margin_of_safety_column(i, z_y, L))
+
+
+plt.plot(y_lst, safetymarginlst_column)
+plt.show()
+
+
 
 
 
@@ -496,54 +536,51 @@ stress_up = []
 stress_down = []
 yield_stress_tension = []
 yield_stress_compress = []
+z_values_compress = []
+z_values_tension = []
+safetymarginlst_compress = []
+safetymarginlst_tension = []
+y_lst_compress = []
+y_lst_tension = []
 
-#load_factor = float(input("Load Factor: "))
-
-def compressiontension_crit(y, z_comp, z_tens):
+def compressiontension_crit(y):
+    global stress_up, stress_down, yield_stress_tension, yield_stress_compress, z_values_compress, z_values_tension
     for i in range(len(y)):
-        stress_up.append(columnbuckling_bendingstress(z_comp))
-        stress_down.append(columnbuckling_bendingstress(z_tens))
-        yield_stress_tension.append(sigmayield_tens)
+        z_comp = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y[i])[2]
+        stress_up.append(-columnbuckling_bendingstress(y[i], z_comp))
         yield_stress_compress.append(sigmayield_comp)
+        z_values_compress.append(z_comp)
+        y_lst_compress.append(y[i])
+        
+        safetymarginlst_compress.append(yield_stress_compress[i] / stress_up[i])
+        if safetymarginlst_compress[i] < 1 or safetymarginlst_compress[i] > 10:
+            break
+
+    for i in range(len(y)):
+        z_tens = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y[i])[1]
+        stress_down.append(columnbuckling_bendingstress(y[i], z_tens))
+        yield_stress_tension.append(sigmayield_tens)
+        z_values_tension.append(z_tens)
+        y_lst_tension.append(y[i])
+        
+        safetymarginlst_tension.append(yield_stress_tension[i] / stress_down[i])
+        if safetymarginlst_compress[i] < 1 or safetymarginlst_compress[i] > 10:
+            break
+        if safetymarginlst_tension[i] < 1 or safetymarginlst_tension[i] > 10:
+            break
+
     stress_up = np.array(stress_up[:-1])
     stress_down = np.array(stress_down[:-1]) * -1
     yield_stress_compress = np.array(yield_stress_compress[:-1])
     yield_stress_tension = np.array(yield_stress_tension[:-1])
-    stress_up = stress_up * load_factor
-    stress_down = stress_down * load_factor
 
-    if load_factor>=0:
-        compressive_stress = stress_up
-        tension_stress = stress_down
-        margin_of_safety_compressive = yield_stress_compress / stress_up
-        #i_for_compress = np.argmax(margin_of_safety_compressive > 2)
-        margin_of_safety_tensional = yield_stress_tension / stress_down
-        #i_for_tension = np.argmax(margin_of_safety_tensional > 2)
-    else:
-        compressive_stress = stress_down
-        tension_stress = stress_up
-        margin_of_safety_compressive = yield_stress_compress / stress_down
-        #i_for_compress = np.argmax(margin_of_safety_compressive > 2)
-        margin_of_safety_tensional = yield_stress_tension / stress_up
-        #i_for_tension = np.argmax(margin_of_safety_tensional > 2)
+    return stress_up, stress_down, safetymarginlst_compress, safetymarginlst_tension, z_values_compress, z_values_tension
 
-    return compressive_stress, tension_stress
+plt.plot(y_lst_compress[:-1], compressiontension_crit(yvalues)[2])
+plt.show()
+plt.plot(y_lst_compress[:-1], compressiontension_crit(yvalues)[3])
+plt.show()
 
-'''
-#check the value
-found_compress = False
-for i in range(len(compressive_stress)):
-    if compressive_stress[i] < -241000000:
-        print(f"Value smaller than -241000000 found in compress")
-        found_compress = True
-        break
-found_tension = False
-for i in range(len(tension_stress)):
-    if tension_stress[i] > 267000000:
-        print(f"Value larger than 267000000 found in tension")
-        found_tension = True
-        break
-'''
 
 
 ## ------------------- Printing Statements ------------------- ##
