@@ -336,8 +336,6 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 
 ## ------------------- Buckling Analysis | Web Buckling ------------------- ##
 
-
-
 tsk = float(input("Enter the thickness of the skin [mm]: "))*(10**-3) 
 
 tf = float(input("Enter the thickness of the front spar [mm]: "))*(10**-3)
@@ -384,22 +382,46 @@ a_h_interp = np.linspace(1, 3.5, 251)
 ks_interp = interpolation_function(a_h_interp)
 
 
-distr_ks = []
+
 tolerance = 1e-10
-def tau_cr(t, y):
-    h = chord(y)*t_c
+def tau_cr(tf, tm, tr, y):
+    hf = chord(y)*t_c_f
+    hm = chord(y)*t_c_m
+    hr = chord(y)*t_c_r
     
-    current_a_h = round(L/h,2)
-    index_match = np.where(np.abs(a_h_interp - current_a_h) < tolerance)[0]
-    if index_match.size > 0 and current_a_h < 3.5:
-        ks = float(ks_interp[index_match[0]])
+    
+    Fcurrent_a_h = round(L/hf,2)
+    Findex_match = np.where(np.abs(a_h_interp - Fcurrent_a_h) < tolerance)[0]
+    
+    Mcurrent_a_h = round(L/hm,2)
+    Mindex_match = np.where(np.abs(a_h_interp - Mcurrent_a_h) < tolerance)[0]
+    
+    Rcurrent_a_h = round(L/hr,2)
+    Rindex_match = np.where(np.abs(a_h_interp - Rcurrent_a_h) < tolerance)[0]
+    
+    if Findex_match.size > 0 and Fcurrent_a_h < 3.5:
+        ksf = float(ks_interp[Findex_match[0]])
     else:
-        ks = 9.6
-    distr_ks.append(ks)
+        ksf = 9.6
+        
+    if Mindex_match.size > 0 and Mcurrent_a_h < 3.5:
+        ksm = float(ks_interp[Mindex_match[0]])
+    else:
+        ksm = 9.6
+        
+    if Rindex_match.size > 0 and Rcurrent_a_h < 3.5:
+        ksr = float(ks_interp[Rindex_match[0]])
+    else:
+        ksr = 9.6
     
-    numerator = ks*E*(np.pi**2)
-    denominator = 12*(1-(poisson**2))
-    return (numerator/denominator)*((t/h)**2)
+    numerator = E*np.pi**2
+    denominator = 12*(1 - poisson**2)
+    
+    critF = (numerator * ksf * tf**2)/(denominator * hf**2)
+    critM = (numerator * ksm * tm**2)/(denominator * hm**2)
+    critR = (numerator * ksr * tr**2)/(denominator * hr**2)
+    
+    return [critF, critM, critR]
 
 
 def tau_max(shear, torque, tf, tm, tr, tsk, y):
@@ -409,13 +431,13 @@ def tau_max(shear, torque, tf, tm, tr, tsk, y):
     wf = (chord(y)/4) - tf - (tm/2)
     wr = (chord(y)/4) - tr - (tm/2)
     
-    Af = chord(y)*t_c*wf
-    Ar = chord(y)*t_c*wr
+    Af = chord(y)*t_c_m*wf + (chord(y)*t_c_f*wf*0.5)
+    Ar = chord(y)*t_c_m*wr + (chord(y)*t_c_r*wr*0.5)
     
-    twist_ff = (1/(2*Af*G))*((chord(y)/(2*tsk))+((chord(y)*t_c)/(tm))+((chord(y)*t_c)/(tf)))
-    twist_fr = (1/(2*Af*G))*((-chord(y)*t_c)/tm)
-    twist_rf = (1/(2*Ar*G))*((-chord(y)*t_c)/tm)
-    twist_rr = (1/(2*Ar*G))*((chord(y)/(2*tsk))+((chord(y)*t_c)/(tm))+((chord(y)*t_c)/(tr)))
+    twist_ff = (1/(2*Af*G))*((chord(y)/(2*tsk))+((chord(y)*t_c_m)/(tm))+((chord(y)*t_c_f)/(tf)))
+    twist_fr = (1/(2*Af*G))*((-chord(y)*t_c_m)/tm)
+    twist_rf = (1/(2*Ar*G))*((-chord(y)*t_c_m)/tm)
+    twist_rr = (1/(2*Ar*G))*((chord(y)/(2*tsk))+((chord(y)*t_c_m)/(tm))+((chord(y)*t_c_r)/(tr)))
     
     
     matr_A = np.array([[twist_ff, twist_fr, -1], 
@@ -445,9 +467,9 @@ for i, _ in enumerate(yvalues):
     max_m = tau_max(sheardist[i], torquefunction(yvalues[i]), tf, tm, tr, tsk, yvalues[i])[1]
     max_r = tau_max(sheardist[i], torquefunction(yvalues[i]), tf, tm, tr, tsk, yvalues[i])[2]
     
-    crit_f = tau_cr(tf, yvalues[i])
-    crit_m = tau_cr(tm, yvalues[i])
-    crit_r = tau_cr(tr, yvalues[i])
+    crit_f = tau_cr(tf, tm, tr, yvalues[i])[0]
+    crit_m = tau_cr(tf, tm, tr, yvalues[i])[1]
+    crit_r = tau_cr(tf, tm, tr, yvalues[i])[2]
 
     MOS_f.append(abs(crit_f/max_f))
     MOS_m.append(abs(crit_m/max_m))
@@ -455,14 +477,14 @@ for i, _ in enumerate(yvalues):
 
 plt.plot(yvalues, MOS_f, color="g", label = 'Front spar')
 plt.plot(yvalues, MOS_m, color="b", label = 'Mid spar')
-plt.axis([0, 33, 0, 75])
+plt.plot(yvalues, MOS_r, color="r", label = 'Rear spar')
+plt.axis([0, 33, 0, 200])
 plt.xlabel('Spanwise Location [m]')
 plt.ylabel('MOS [-]')
 plt.title("MOS for the front and mid spar")
 plt.legend()
 
 plt.show()
-
 
 ## ------------------- Buckling Analysis | Skin Buckling ------------------- ##
 
