@@ -427,7 +427,7 @@ def tau_max(shear, torque, tf, tm, tr, tsk, y):
     
     tauf = matr_C[0]/tf
     taur = matr_C[1]/tr
-    taum  = (matr_C[0] + matr_C[1])/tm
+    taum  = (matr_C[0] - matr_C[1])/tm
 
     ## AVERAGE:
     h = chord(y)*0.1 #height of the front spar
