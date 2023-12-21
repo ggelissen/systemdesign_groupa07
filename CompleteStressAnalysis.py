@@ -215,13 +215,9 @@ def chord(y):
 
 sheardist = sheardistribution(yvalues)
 sheardist[0] = 0
-
 momentdist = momentdistribution(yvalues)
-'''
-def momentone(y):
-    i=np.where(yvalues == y)[0]
-    return momentdist[i]
-'''
+momentdist[0] = 0
+
 Tw = Weng*grav*((chord(0.35*b/2)/2)+engcenter)
 Tt = T*h*np.cos(sweep_LE*d2r)
 
@@ -234,16 +230,42 @@ for element in yvalues:
         
 moment = []
 for i in range(len(yvalues)):
-    moment.append(yCmc4_result10(yvalues[i])*0.5*rho*chord(yvalues[i])*S*v**2)
+    moment.append(yCmc4_result10(yvalues[i])*0.5*rho*(chord(yvalues[i])**2)*v**2)
 
-total_torque = np.array(moment) + np.array(torque)
+moment_integrated = integrate.cumtrapz(moment, yvalues, initial=0)
+moment_integrated = np.flip(moment_integrated)
+
+total_torque = np.array(moment_integrated) + np.array(torque)
 
 def y_torque(y, T):
     return sp.interpolate.interp1d(y, T, kind='cubic', fill_value="extrapolate")
 torquefunction = y_torque(yvalues, total_torque)
 
-plt.plot(yvalues, momentfunction(yvalues))
+
+plt.plot(yvalues, sheardist, "b")
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Shear [N]')
+plt.title('Shear Distribution')
 plt.show()
+
+plt.plot(yvalues,momentdist, "g")
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Moment [Nm]')
+plt.title('Moment Distribution')
+plt.show()
+
+plt.plot(yvalues, total_torque)
+plt.xlabel('Spanwise location [m]')
+plt.ylabel('Torque [Nm]')
+plt.title('Torque Distribution')
+plt.show()
+
+
+
+
+
+
+
 
 
 
@@ -315,14 +337,14 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 ## ------------------- Buckling Analysis | Web Buckling ------------------- ##
 
 
-tf = 0.030 # float(input("Enter the thickness of the spar [mm]: "))*(10**-3)
+tf = 0.027 # float(input("Enter the thickness of the spar [mm]: "))*(10**-3)
 tr = tf # float(input("Enter the thickness of the rear spar [mm]: "))*(10**-3)
 tm = tf # float(input("Enter the thickness of the mid spar [mm]: "))*(10**-3)
 ns = 3 # int(input("Enter the amount of spars: "))
 
-tsk = 0.030 # float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
+tsk = 0.027 # float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
 stringerarea = 0.001875 # float(input("Enter the cross-sectional area of the stringer [m^2]: "))
-stringernumber = 18 # int(input("Enter the number of stringers [#]: "))
+stringernumber = 30 # int(input("Enter the number of stringers [#]: "))
 
 y_value = 1.3 # float(input("Enter spanwise position: "))
 ribspacing = 1.3 # float(input("Enter rib spacing: "))
@@ -521,7 +543,10 @@ for i in yvalues:
     safetymarginlst_column.append(margin_of_safety_column(i, z_y, L))
 
 
-plt.plot(y_lst, safetymarginlst_column)
+plt.plot(y_lst, safetymarginlst_column, linestyle='-', color='b', label='Safety Margin')
+plt.xlabel('Spanwise Position [m]')
+plt.ylabel('Safety Margin [-]')
+plt.title('Safety Margin - Option 2')
 plt.show()
 
 
@@ -534,7 +559,7 @@ plt.show()
 
 
 def compressiontension_crit(y):
-    
+
     stress_up = []
     stress_down = []
     yield_stress_tension = []
@@ -570,13 +595,12 @@ def compressiontension_crit(y):
 
     return stress_up, stress_down, safetymarginlst_compress, safetymarginlst_tension, z_values_compress, z_values_tension, y_lst_compress, y_lst_tension
 
-print(len(compressiontension_crit(yvalues)[0]))
-
+'''
 plt.plot(compressiontension_crit(yvalues)[6][:-1], compressiontension_crit(yvalues)[2][:-1])
 plt.show()
 plt.plot(compressiontension_crit(yvalues)[7][:-1], compressiontension_crit(yvalues)[3][:-1])
 plt.show()
-
+'''
 
 
 ## ------------------- Printing Statements ------------------- ##
