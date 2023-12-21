@@ -337,86 +337,131 @@ def calculate_moment_of_inertia(n_spar, t_1, w_u1, w_d1, A1, n_str1, y):
 ## ------------------- Buckling Analysis | Web Buckling ------------------- ##
 
 
-tf = 0.027 # float(input("Enter the thickness of the spar [mm]: "))*(10**-3)
-tr = tf # float(input("Enter the thickness of the rear spar [mm]: "))*(10**-3)
-tm = tf # float(input("Enter the thickness of the mid spar [mm]: "))*(10**-3)
-ns = 3 # int(input("Enter the amount of spars: "))
 
-tsk = 0.027 # float(input("Enter the thickness of the skin [mm]: "))*(10**-3)
-stringerarea = 0.001875 # float(input("Enter the cross-sectional area of the stringer [m^2]: "))
-stringernumber = 30 # int(input("Enter the number of stringers [#]: "))
+tsk = float(input("Enter the thickness of the skin [mm]: "))*(10**-3) 
 
-y_value = 1.3 # float(input("Enter spanwise position: "))
-ribspacing = 1.3 # float(input("Enter rib spacing: "))
+tf = float(input("Enter the thickness of the front spar [mm]: "))*(10**-3)
+tr = float(input("Enter the thickness of the rear spar [mm]: "))*(10**-3)
+tm = float(input("Enter the thickness of the mid spar [mm]: "))*(10**-3)
 
-z_down = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[1]
-z_up = calculate_moment_of_inertia(ns, tf, tsk, tsk, stringerarea, stringernumber, y_value)[2]
 
-a = ribspacing
-kslst_web = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
-a_hlst_web = [1, 1.2, 1.5, 1.7, 2, 2.5, 3, 3.5]
+## need to calculate three kinds of shear stress;
+## critical tau - material & geometry dependent (pi^2KsE/12(1-poisson^2))*(t/b)^2
+## avg and torsion tau - due to loading
 
-interpolation_function_web = sp.interpolate.interp1d(a_hlst_web, kslst_web, kind = 'cubic', fill_value = 'extrapolate')
-a_h_interp_web = np.linspace(1, 3.5, 251)
-ks_interp_web = interpolation_function_web(a_h_interp_web)
+## In formula in literature, b is used. Here I use h as not to confuse b for span.
+for i in yvalues:
+    if i <= 2.6:
+        L = 1.3
+    elif i <= 5.4:
+        L = 1.4
+    elif i <= 6.9:
+        L = 1.5
+    elif i <= 11.7:
+        L = 1.6
+    elif i <= 13.4:
+        L = 1.7
+    elif i <= 15.2:
+        L = 1.8
+    elif i <= 17.2:
+        L = 2.0
+    elif i <= 19.4:
+        L = 2.2
+    elif i <= 22.0:
+        L = 2.6
+    elif i <= 25.0:
+        L = 3.0
+    elif i <= 28.7:
+        L = 3.7
+    elif i <= 33.5:
+        L = 4.8
 
-distr_ks_web = []
-def webbuckling_crit(t, y):
-    tolerance = 1e-10
-    h = 0.1082 * chord(y)
+kslst = [15, 13, 11.8, 11, 10.5, 9.8, 9.7, 9.6]
+a_hlst = [1, 1.2, 1.5, 1.7, 2, 2.5, 3, 3.5]
+
+interpolation_function = sp.interpolate.interp1d(a_hlst, kslst, kind = 'cubic', fill_value = 'extrapolate')
+a_h_interp = np.linspace(1, 3.5, 251)
+ks_interp = interpolation_function(a_h_interp)
+
+
+distr_ks = []
+tolerance = 1e-10
+def tau_cr(t, y):
+    h = chord(y)*t_c
     
-    current_a_h = round(a/h,2)
-    index_match = np.where(np.abs(a_h_interp_web - current_a_h) < tolerance)[0]
+    current_a_h = round(L/h,2)
+    index_match = np.where(np.abs(a_h_interp - current_a_h) < tolerance)[0]
     if index_match.size > 0 and current_a_h < 3.5:
-        ks = float(ks_interp_web[index_match[0]])
-        distr_ks_web.append(ks)
+        ks = float(ks_interp[index_match[0]])
     else:
         ks = 9.6
-        distr_ks_web.append(ks)
-    return ((E*ks*np.pi**2)/(12*(1 - poisson**2)))*(t/h)**2
+    distr_ks.append(ks)
+    
+    numerator = ks*E*(np.pi**2)
+    denominator = 12*(1-(poisson**2))
+    return (numerator/denominator)*((t/h)**2)
 
-def webbuckling_avg(shear, y):
-    h = 0.1082 * chord(y) 
-    return shear/((tf + tm + tr)*h)
 
-def webbuckling_torque(torque, y):
-    wf = (chord(y)/2) - tf - (tm/2)
-    wr = (chord(y)/2) - tr - (tm/2)
+def tau_max(shear, torque, tf, tm, tr, tsk, y):
+    ## TORQUE: 
+    ## solving multiple eqs using arrays 
+    ## matr_A*[qF, qR, dTheta/dZ] = matr_B 
+    wf = (chord(y)/4) - tf - (tm/2)
+    wr = (chord(y)/4) - tr - (tm/2)
+    
     Af = chord(y)*t_c*wf
     Ar = chord(y)*t_c*wr
     
-    matr_A = np.array([[(chord(y)/2)/(Af*tsk*G) + (chord(y)*t_c)/(2*Af*tf*G) + (chord(y)*t_c)/(2*Af*tm*G), -(chord(y)*t_c)/(2*Af*tm*G), -1], 
-    [-(chord(y)*t_c)/(2*Ar*tm*G), (chord(y)/2)/(Ar*tsk*G) + (chord(y)*t_c)/(2*Ar*tr*G) + (chord(y)*t_c)/(2*Ar*tm*G), -1], [2*Af, 2*Ar, 0]])
+    twist_ff = (1/(2*Af*G))*((chord(y)/(2*tsk))+((chord(y)*t_c)/(tm))+((chord(y)*t_c)/(tf)))
+    twist_fr = (1/(2*Af*G))*((-chord(y)*t_c)/tm)
+    twist_rf = (1/(2*Ar*G))*((-chord(y)*t_c)/tm)
+    twist_rr = (1/(2*Ar*G))*((chord(y)/(2*tsk))+((chord(y)*t_c)/(tm))+((chord(y)*t_c)/(tr)))
+    
+    
+    matr_A = np.array([[twist_ff, twist_fr, -1], 
+                       [twist_rf, twist_rr, -1], 
+                       [2*Af, 2*Ar, 0]])
     matr_B= np.array([0, 0, torque])
+    
     matr_C = np.linalg.solve(matr_A, matr_B)
     
-    tau_F = matr_C[0]/tf
-    tau_R = matr_C[1]/tr
-    tau_M = (matr_C[0] + matr_C[1])/tm
-    return tau_F, tau_M, tau_R
+    tauf = matr_C[0]/tf
+    taur = matr_C[1]/tr
+    taum  = (matr_C[0] + matr_C[1])/tm
 
-tau_cr_f = []
-tau_cr_m = []
-tau_cr_r = []
-tau_avg = []
-tau_torque_f = []
-tau_torque_m = []
-tau_torque_r = []
-
-i = 0
-for value in yvalues:
-    tau_cr_f.append(webbuckling_crit(tf, value))
-    tau_cr_m.append(webbuckling_crit(tm, value))
-    tau_cr_r.append(webbuckling_crit(tr, value))
+    ## AVERAGE:
+    h = chord(y)*0.1 #height of the front spar
+    avg = shear/((tf + tm + tr)*h)
+    kv = 2
     
-    tau_avg.append(webbuckling_avg(shearfunction(value), value))
-    tau_torque_f.append(webbuckling_torque(total_torque[i], value)[0])
-    tau_torque_m.append(webbuckling_torque(total_torque[i], value)[1])
-    tau_torque_r.append(webbuckling_torque(total_torque[i], value)[2])
+    return [tauf + kv*avg, taum + kv*avg, taur + kv*avg] #torque_tau largest: at root, torque is close to max, at tip, dtheta/dz is max
+
+MOS_f = []
+MOS_m = []
+MOS_r = []
+
+for i, _ in enumerate(yvalues):
+    max_f = tau_max(sheardist[i], torquefunction(yvalues[i]), tf, tm, tr, tsk, yvalues[i])[0]
+    max_m = tau_max(sheardist[i], torquefunction(yvalues[i]), tf, tm, tr, tsk, yvalues[i])[1]
+    max_r = tau_max(sheardist[i], torquefunction(yvalues[i]), tf, tm, tr, tsk, yvalues[i])[2]
     
-    i += 1 
+    crit_f = tau_cr(tf, yvalues[i])
+    crit_m = tau_cr(tm, yvalues[i])
+    crit_r = tau_cr(tr, yvalues[i])
 
+    MOS_f.append(abs(crit_f/max_f))
+    MOS_m.append(abs(crit_m/max_m))
+    MOS_r.append(abs(crit_r/max_r))
 
+plt.plot(yvalues, MOS_f, color="g", label = 'Front spar')
+plt.plot(yvalues, MOS_m, color="b", label = 'Mid spar')
+plt.axis([0, 33, 0, 75])
+plt.xlabel('Spanwise Location [m]')
+plt.ylabel('MOS [-]')
+plt.title("MOS for the front and mid spar")
+plt.legend()
+
+plt.show()
 
 
 ## ------------------- Buckling Analysis | Skin Buckling ------------------- ##
